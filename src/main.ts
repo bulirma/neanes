@@ -19,6 +19,8 @@ import router from './router';
 import { LatexExporter } from './services/integration/LatexExporter';
 import { MusicXmlExporter } from './services/integration/MusicXmlExporter';
 import { LyricService } from './services/LyricService';
+// random generater service
+import { UniformRandomNeumeGenerator } from './services/RandomNeumeGenerator';
 import { TextSearchService } from './services/TextSearchService';
 import { isElectron } from './utils/isElectron';
 
@@ -64,6 +66,18 @@ app.provide('textSearchService', new TextSearchService());
 app.provide('lyricService', new LyricService());
 app.provide('latexExporter', new LatexExporter());
 app.provide('musicXmlExporter', new MusicXmlExporter());
+app.provide('randomNeumeGenerator', new UniformRandomNeumeGenerator());
 app.use(router);
 app.use(I18NextVue, { i18next });
 app.mount('#app');
+
+(window as any).generateRandomPages = function (n: number) {
+  const editor = (window as any).editorInstance;
+  for (let i = 0; i < n; ++i) {
+    editor.generateRandomPage();
+  }
+};
+
+setTimeout(() => {
+  (window as any).generateRandomPages(42);
+}, 5500);

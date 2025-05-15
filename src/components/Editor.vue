@@ -1333,6 +1333,8 @@ import { LayoutService } from '@/services/LayoutService';
 import { LyricService } from '@/services/LyricService';
 import { NeumeKeyboard } from '@/services/NeumeKeyboard';
 import { IPlatformService } from '@/services/platform/IPlatformService';
+// random generater service
+import { UniformRandomNeumeGenerator } from '@/services/RandomNeumeGenerator';
 import { SaveService } from '@/services/SaveService';
 import { TextSearchService } from '@/services/TextSearchService';
 import { GORTHMIKON, PELASTIKON, TATWEEL } from '@/utils/constants';
@@ -1397,6 +1399,9 @@ export default class Editor extends Vue {
   @Inject() readonly lyricService!: LyricService;
   @Inject() readonly latexExporter!: LatexExporter;
   @Inject() readonly musicXmlExporter!: MusicXmlExporter;
+
+  // injection of random neume generator
+  @Inject() readonly randomNeumeGenerator!: UniformRandomNeumeGenerator;
 
   searchTextQuery: string = '';
   searchTextPanelIsOpen = false;
@@ -2209,6 +2214,9 @@ export default class Editor extends Vue {
   }
 
   mounted() {
+    // hack to access this component globally
+    (window as any).editorInstance = this;
+
     const savedAudioOptions = localStorage.getItem('audioOptionsDefault');
 
     if (savedAudioOptions != null) {
@@ -2520,6 +2528,11 @@ export default class Editor extends Vue {
     this.playbackSettingsDialogIsOpen = false;
 
     this.saveAudioOptions();
+  }
+
+  generateRandomPage() {
+    this.selectedElement = this.elements[this.elements.length - 1];
+    this.addQuantitativeNeume(this.randomNeumeGenerator.next());
   }
 
   closePageSetupDialog() {
