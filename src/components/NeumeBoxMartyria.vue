@@ -23,6 +23,11 @@
         :style="measureBarStyle"
       />
       <Neume
+        v-if="hasQuantitativeNeume"
+        :neume="neume.quantitativeNeume"
+        :style="quantitativeNeumeStyle"
+      />
+      <Neume
         v-if="hasTempoRight"
         :neume="neume.tempoRight"
         :style="tempoStyle"
@@ -82,6 +87,10 @@ export default class NeumeBoxMartyria extends Vue {
     return this.neume.measureBarRight != null;
   }
 
+  get hasQuantitativeNeume() {
+    return this.neume.quantitativeNeume != null && this.neume.alignRight;
+  }
+
   get isMeasureBarAbove() {
     return this.neume.measureBarLeft?.endsWith('Above');
   }
@@ -106,6 +115,14 @@ export default class NeumeBoxMartyria extends Vue {
     return {
       color: this.pageSetup.fthoraDefaultColor,
       webkitTextStrokeWidth: withZoom(this.pageSetup.fthoraDefaultStrokeWidth),
+    } as StyleValue;
+  }
+
+  get quantitativeNeumeStyle() {
+    return {
+      marginLeft: withZoom(this.neume.padding),
+      color: this.pageSetup.neumeDefaultColor,
+      webkitTextStrokeWidth: withZoom(this.pageSetup.neumeDefaultStrokeWidth),
     } as StyleValue;
   }
 

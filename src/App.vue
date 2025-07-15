@@ -73,6 +73,10 @@ export default class App extends Vue {
   body {
     overflow: visible !important;
   }
+
+  .ck-body-wrapper {
+    display: none !important;
+  }
 }
 
 @page {
@@ -131,6 +135,30 @@ export default class App extends Vue {
   src: url('./assets/fonts/GFSDidotBoldItalic.otf');
   font-weight: bold;
   font-style: italic;
+}
+
+@font-face {
+  font-family: 'Old Standard';
+  src: url('./assets/fonts/OldStandard-Bold.otf');
+  font-weight: bold;
+}
+
+@font-face {
+  font-family: 'Old Standard';
+  src: url('./assets/fonts/OldStandard-BoldItalic.otf');
+  font-weight: bold;
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Old Standard';
+  src: url('./assets/fonts/OldStandard-Italic.otf');
+  font-style: italic;
+}
+
+@font-face {
+  font-family: 'Old Standard';
+  src: url('./assets/fonts/OldStandard-Regular.otf');
 }
 
 @font-face {

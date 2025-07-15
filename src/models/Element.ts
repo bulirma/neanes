@@ -168,6 +168,7 @@ export class NoteElement extends ScoreElement {
   public tertiaryFthoraPrevious: Fthora | null = null;
   public computedMeasureBarLeftPrevious: MeasureBar | null = null;
   public computedMeasureBarRightPrevious: MeasureBar | null = null;
+  public computedIsonOffsetYPrevious: number | null = null;
 
   // Fthora helper
   public fthoraCarry: Fthora | null = null;
@@ -248,6 +249,15 @@ export class NoteElement extends ScoreElement {
       secondaryGorgonNeume: this.secondaryGorgonNeume,
       secondaryGorgonNeumeOffsetX: this.secondaryGorgonNeumeOffsetX,
       secondaryGorgonNeumeOffsetY: this.secondaryGorgonNeumeOffsetY,
+      koronis: this.koronis,
+      koronisOffsetX: this.koronisOffsetX,
+      koronisOffsetY: this.koronisOffsetY,
+      stavros: this.stavros,
+      stavrosOffsetX: this.stavrosOffsetX,
+      stavrosOffsetY: this.stavrosOffsetY,
+      tie: this.tie,
+      tieOffsetX: this.tieOffsetX,
+      tieOffsetY: this.tieOffsetY,
       timeNeume: this.timeNeume,
       timeNeumeOffsetX: this.timeNeumeOffsetX,
       timeNeumeOffsetY: this.timeNeumeOffsetY,
@@ -258,6 +268,19 @@ export class NoteElement extends ScoreElement {
       vareiaOffsetX: this.vareiaOffsetX,
       vareiaOffsetY: this.vareiaOffsetY,
     } as Partial<NoteElement>;
+  }
+
+  public cloneFormat() {
+    return {
+      lyricsColor: this.lyricsColor,
+      lyricsFontFamily: this.lyricsFontFamily,
+      lyricsFontSize: this.lyricsFontSize,
+      lyricsStrokeWidth: this.lyricsStrokeWidth,
+      lyricsUseDefaultStyle: this.lyricsUseDefaultStyle,
+      lyricsFontStyle: this.lyricsFontStyle,
+      lyricsFontWeight: this.lyricsFontWeight,
+      lyricsTextDecoration: this.lyricsTextDecoration,
+    };
   }
 
   public get quantitativeNeume() {
@@ -405,6 +428,8 @@ export class NoteElement extends ScoreElement {
   public scaleNotesVirtual: ScaleNote[] = [];
   public computedMeasureBarLeft: MeasureBar | null = null;
   public computedMeasureBarRight: MeasureBar | null = null;
+  public computedIsonOffsetY: number | null = null;
+  public isonOffsetYBeforeAdjustment: number = 0;
 
   private _quantitativeNeume: QuantitativeNeume = QuantitativeNeume.Ison;
   private _timeNeume: TimeNeume | null = null;
@@ -582,6 +607,7 @@ export class MartyriaElement extends ScoreElement {
   public tempoLeft: TempoSign | null = null;
   public tempo: TempoSign | null = null;
   public tempoRight: TempoSign | null = null;
+  public quantitativeNeume: QuantitativeNeume | null = null;
   public alignRight: boolean = false;
   public bpm: number = 0;
   public spaceAfter: number = 0;
@@ -609,6 +635,7 @@ export class MartyriaElement extends ScoreElement {
 
   // Used for display
   public neumeWidth: number = 0;
+  public padding: number = 0;
 
   private _measureBarLeft: MeasureBar | null = null;
   private _measureBarRight: MeasureBar | null = null;
@@ -658,6 +685,8 @@ export class MartyriaElement extends ScoreElement {
       chromaticFthoraNote: this.chromaticFthoraNote,
       tempo: this.tempo,
       bpm: this.bpm,
+      lineBreak: this.lineBreak,
+      lineBreakType: this.lineBreakType,
     } as Partial<MartyriaElement>;
   }
 }
@@ -732,6 +761,7 @@ export class TextBoxElement extends ScoreElement {
   public alignment: TextBoxAlignment = TextBoxAlignment.Left;
   public color: string = '#000000';
   public content: string = '';
+  public contentBottom: string = '';
   public contentLeft: string = '';
   public contentCenter: string = '';
   public contentRight: string = '';
@@ -750,6 +780,7 @@ export class TextBoxElement extends ScoreElement {
   public customHeight: number | null = null;
   public marginTop: number = 0;
   public marginBottom: number = 0;
+  public fillWidth: boolean = false;
 
   // Values computed by the layout service
   public computedFontFamily: string = '';
@@ -759,6 +790,7 @@ export class TextBoxElement extends ScoreElement {
   public computedColor: string = '#000000';
   public computedStrokeWidth: number = 0;
   public computedLineHeight: number | null = null;
+  public minHeight: number = 10;
 
   // Re-render helpers
   public heightPrevious: number = 0;
@@ -795,6 +827,7 @@ export class TextBoxElement extends ScoreElement {
       strokeWidth: this.strokeWidth,
       customWidth: this.customWidth,
       customHeight: this.customHeight,
+      fillWidth: this.fillWidth,
       marginTop: this.marginTop,
       marginBottom: this.marginBottom,
       inline: this.inline,
@@ -816,15 +849,33 @@ export class TextBoxElement extends ScoreElement {
 export class RichTextBoxElement extends ScoreElement {
   public readonly elementType: ElementType = ElementType.RichTextBox;
   public content: string = '';
+  public contentBottom: string = '';
   public contentLeft: string = '';
   public contentRight: string = '';
   public contentCenter: string = '';
   public multipanel: boolean = false;
   public rtl: boolean = false;
+  public inline: boolean = false;
+  public centerOnPage: boolean = false;
+  public modeChange: boolean = false;
+  public modeChangePhysicalNote: ScaleNote = ScaleNote.Pa;
+  public modeChangeScale: Scale = Scale.Diatonic;
+  public modeChangeVirtualNote: ScaleNote | null = null;
+  public modeChangeIgnoreAttractions: boolean = false;
+  public modeChangePermanentEnharmonicZo: boolean = false;
+  public modeChangeBpm: number = 120;
 
   public height: number = 20;
+  public customWidth: number | null = null;
   public marginTop: number = 0;
   public marginBottom: number = 0;
+  public offsetYTop: number = 0;
+  public offsetYBottom: number = 0;
+
+  // Values computed by the layout service
+  public defaultLyricsFontHeight: number = 0;
+  public defaultNeumeFontAscent: number = 0;
+  public oligonMidpoint: number = 0;
 
   public clone() {
     const clone = new RichTextBoxElement();
@@ -837,14 +888,27 @@ export class RichTextBoxElement extends ScoreElement {
   public getClipboardProperties() {
     return {
       content: this.content,
+      contentBottom: this.contentBottom,
       contentLeft: this.contentLeft,
       contentRight: this.contentRight,
       contentCenter: this.contentCenter,
       rtl: this.rtl,
       multipanel: this.multipanel,
+      inline: this.inline,
+      centerOnPage: this.centerOnPage,
       height: this.height,
+      customWidth: this.customWidth,
       marginBottom: this.marginBottom,
       marginTop: this.marginTop,
+      offsetYBottom: this.offsetYBottom,
+      offsetYTop: this.offsetYTop,
+      modeChange: this.modeChange,
+      modeChangePhysicalNote: this.modeChangePhysicalNote,
+      modeChangeScale: this.modeChangeScale,
+      modeChangeVirtualNote: this.modeChangeVirtualNote,
+      modeChangeIgnoreAttractions: this.modeChangeIgnoreAttractions,
+      modeChangePermanentEnharmonicZo: this.modeChangePermanentEnharmonicZo,
+      modeChangeBpm: this.modeChangeBpm,
     } as Partial<RichTextBoxElement>;
   }
 }
