@@ -72,22 +72,15 @@ app.use(I18NextVue, { i18next });
 app.mount('#app');
 
 
-(window as any).makeControlsAvailable = function () {
-    (window as any).controls = {
-        quantNeumeBtns: document.querySelectorAll('.neume-selector-panel .neume')
-    };
-};
+//(window as any).makeControlsAvailable = function () {
+//    (window as any).controls = {
+//        quantNeumeBtns: document.querySelectorAll('.neume-selector-panel .neume')
+//    };
+//};
 
 (window as any).generateRandomPages = function (n: number) {
-  const editor = (window as any).editorInstance;
-  for (let i = 0; i < n; ++i) {
-    editor.generateRandomPage();
-  }
+    const editor = (window as any).editorInstance;
+    for (let i = 0; i < n; ++i) {
+        editor.generateRandomPage();
+    }
 };
-
-window.addEventListener('load', () => {
-    setTimeout(() => {
-        (window as any).makeControlsAvailable();
-        (window as any).generateRandomPages(42);
-    }, 2000);
-});

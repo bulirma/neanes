@@ -2563,6 +2563,37 @@ export default class Editor extends Vue {
     this.audioService.dispose();
   }
 
+  async saveWorkspaceWithTimeStamp(compress: boolean = false) {
+    const workspace = this.selectedWorkspace;
+    const currentTime = new Date();
+    const extension = compress ? '.byz' : '.byzx';
+    workspace.filePath = currentTime.toISOString() + extension;
+
+    const result = await this.saveWorkspaceAs(workspace);
+    if (result.success) {
+      workspace.filePath = result.filePath;
+      workspace.hasUnsavedChanges = false;
+    }
+  }
+
+  async generateRandomPage() {
+    // generating random neumes
+    // first there is need to select the last element, but do not do that after inserting
+    this.selectedElement = this.elements[this.elements.length - 1];
+    for (let i = 0; i < 145; ++i) {
+      const element = this.randomNeumeGenerator.next();
+      element.lyricsColor = this.score.pageSetup.lyricsDefaultColor;
+      element.lyricsFontFamily = this.score.pageSetup.lyricsDefaultFontFamily;
+      element.lyricsFontSize = this.score.pageSetup.lyricsDefaultFontSize;
+      element.lyricsFontStyle = this.score.pageSetup.lyricsDefaultFontStyle;
+      element.lyricsFontWeight = this.score.pageSetup.lyricsDefaultFontWeight;
+      element.lyricsStrokeWidth = this.score.pageSetup.lyricsDefaultStrokeWidth;
+      this.addScoreElement(element, this.elements.length - 1);
+      console.log(element);
+      this.save();
+    }
+  }
+
   getElementIndex(element: ScoreElement) {
     return element.index;
   }
@@ -2650,11 +2681,6 @@ export default class Editor extends Vue {
     this.playbackSettingsDialogIsOpen = false;
 
     this.saveAudioOptions();
-  }
-
-  generateRandomPage() {
-    this.selectedElement = this.elements[this.elements.length - 1];
-    this.addQuantitativeNeume(this.randomNeumeGenerator.next());
   }
 
   closePageSetupDialog() {
