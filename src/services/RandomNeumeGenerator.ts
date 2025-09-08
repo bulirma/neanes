@@ -2,17 +2,25 @@ import { NoteElement, ScoreElement } from '@/models/Element';
 import {
   GorgonNeume,
   QuantitativeNeume,
+  TimeNeume,
 } from '@/models/Neumes';
 import { getSecondaryNeume } from '@/models/NeumeReplacements';
 import {
   allQuantitativeNeumes,
+  allTimeNeumes,
   includesHyporoe,
   includesPetasti,
   isCompoundNeume,
+  isHapleDisabled,
+  isKoronisDisabled,
+  getKlasmaType,
   GorgonIndexSetting,
+  hapleNeumes,
+  KlasmaType,
   primaryGorgonNeumes,
   secondaryGorgonNeumes,
   slowGorgonNeumes,
+  TimeIndexSettings,
 } from '@/utils/NeumeCompositionHelper';
 
 export class UniformRandomNeumeGenerator {
@@ -74,6 +82,27 @@ export class UniformRandomNeumeGenerator {
     return randomIndex < 0 ? null : primaryGorgonNeumes[randomIndex];
   }
 
+  randomTimeNeumeIndex(
+    timeSettings: TimeIndexSettings
+  ): number {
+    let range = allTimeNeumes.length + 1;
+    if (timeSettings.hapleDisabled) {
+      range -= 4;
+    }
+    if (timeSettings.koronisDisabled) {
+      --range;
+    }
+    switch (timeSettings.klasmaType) {
+      case KlasmaType.KLASMA_TOP:
+      case KlasmaType.KLASMA_BOTTOM:
+        --range;
+        break;
+      case KlasmaType.NO_KLASMA:
+        range -= 2;
+    }
+    return Math.floor(Math.random() * range) - 1;
+  }
+
   genSecondaryGorgonNeume(
     quantitativeNeume: QuantitativeNeume,
   ): GorgonNeume | null {
@@ -86,6 +115,35 @@ export class UniformRandomNeumeGenerator {
     }
     const randomIndex = this.randomSecondaryGorgonNeumeIndex();
     return randomIndex < 0 ? null : secondaryGorgonNeumes[randomIndex];
+  }
+
+  genTimeNeume(
+    quantitativeNeume: QuantitativeNeume,
+  ): TimeNeume | null {
+    // TODO: also disable for rest neumes
+    const timeSettings: TimeIndexSettings = {
+      klasmaType: getKlasmaType(quantitativeNeume),
+      hapleDisabled: isHapleDisabled(quantitativeNeume),
+      koronisDisabled: isKoronisDisabled(quantitativeNeume),
+    };
+    const randomIndex = this.randomTimeNeumeIndex(timeSettings);
+    if (randomIndex < 0) {
+      return null;
+    }
+    let enabledNeumes = [];
+    if (timeSettings.klasmaType === KlasmaType.KLASMA_BOTH || timeSettings.klasmaType === KlasmaType.KLASMA_TOP) {
+      enabledNeumes.push(TimeNeume.Klasma_Top);
+    }
+    if (timeSettings.klasmaType === KlasmaType.KLASMA_BOTH || timeSettings.klasmaType === KlasmaType.KLASMA_BOTTOM) {
+      enabledNeumes.push(TimeNeume.Klasma_Bottom);
+    }
+    if (!timeSettings.hapleDisabled) {
+      enabledNeumes = enabledNeumes.concat(hapleNeumes);
+    }
+    if (!timeSettings.koronisDisabled) {
+      enabledNeumes.push(TimeNeume.Koronis);
+    }
+    return enabledNeumes[randomIndex];
   }
 
   next(): ScoreElement {

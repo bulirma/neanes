@@ -14,7 +14,7 @@ import {
   //RootSign,
   //TempoSign,
   //Tie,
-  //TimeNeume,
+  TimeNeume,
   //VocalExpressionNeume,
 } from '@/models/Neumes';
 
@@ -24,8 +24,8 @@ export const allQuantitativeNeumes = Object.values(QuantitativeNeume);
 export const primaryGorgonNeumes = allGorgonNeumes.slice(0, 12);
 export const secondaryGorgonNeumes = allGorgonNeumes.slice(12, 23);
 export const slowGorgonNeumes = Object.values(GorgonNeume).slice(23);
-//const allTimeNeumes = Object.values(TimeNeume);
-//const hapleNeumes = allTimeNeumes.slice(2, 6);
+export const allTimeNeumes = Object.values(TimeNeume);
+export const hapleNeumes = allTimeNeumes.slice(2, 6);
 //const allVocalExpressionNeumes = Object.values(VocalExpressionNeume);
 //const allAccidentalNeumes = Object.values(Accidental);
 //const allMeasureBars = Object.values(MeasureBar);
@@ -43,6 +43,14 @@ export const slowGorgonNeumes = Object.values(GorgonNeume).slice(23);
 export interface GorgonIndexSetting {
   omitBottom: boolean;
   includeSlow: boolean;
+}
+
+export enum KlasmaType { KLASMA_TOP, KLASMA_BOTTOM, KLASMA_BOTH, NO_KLASMA }
+
+export interface TimeIndexSettings {
+  klasmaType: KlasmaType;
+  hapleDisabled: boolean;
+  koronisDisabled: boolean;
 }
 
 // gorgon related neumes
@@ -110,3 +118,79 @@ export function includesPetasti(quantitativeNeume: QuantitativeNeume): boolean {
   }
   return false;
 }
+
+// klasma related functions
+
+export function isBottomKlasmaOnlyNeume(quantitativeNeume: QuantitativeNeume): boolean {
+  switch (quantitativeNeume) {
+    case QuantitativeNeume.PetastiWithIson:
+    case QuantitativeNeume.Petasti:
+    case QuantitativeNeume.PetastiPlusOligon:
+    case QuantitativeNeume.PetastiPlusKentimaAbove:
+    case QuantitativeNeume.PetastiPlusHypsiliRight:
+    case QuantitativeNeume.PetastiPlusHypsiliLeft:
+    case QuantitativeNeume.PetastiPlusHypsiliPlusKentimaHorizontal:
+    case QuantitativeNeume.PetastiPlusHypsiliPlusKentimaVertical:
+    case QuantitativeNeume.PetastiPlusDoubleHypsili:
+    case QuantitativeNeume.PetastiPlusApostrophos:
+    case QuantitativeNeume.PetastiPlusElaphron:
+    case QuantitativeNeume.PetastiPlusElaphronPlusApostrophos:
+    case QuantitativeNeume.OligonPlusDoubleHypsili:
+      return true;
+  }
+  return false;
+}
+
+export function isTopKlasmaOnlyNeume(quantitativeNeume: QuantitativeNeume): boolean {
+  switch (quantitativeNeume) {
+    case QuantitativeNeume.Ison:
+    case QuantitativeNeume.KentemataPlusOligon:
+    case QuantitativeNeume.Oligon:
+    case QuantitativeNeume.OligonPlusKentimaBelow:
+    case QuantitativeNeume.OligonPlusKentima:
+    case QuantitativeNeume.OligonPlusHypsiliRight:
+    case QuantitativeNeume.Hamili:
+    case QuantitativeNeume.HamiliPlusApostrophos:
+    case QuantitativeNeume.HamiliPlusElaphron:
+    case QuantitativeNeume.HamiliPlusElaphronPlusApostrophos:
+    case QuantitativeNeume.DoubleHamili:
+    case QuantitativeNeume.Apostrophos:
+    case QuantitativeNeume.Elaphron:
+    case QuantitativeNeume.ElaphronPlusApostrophos:
+      return true;
+  }
+  return false;
+}
+
+export function isKlasmaDisabledNeume(quantitativeNeume: QuantitativeNeume): boolean {
+
+  switch (quantitativeNeume) {
+    case QuantitativeNeume.Hyporoe:
+    case QuantitativeNeume.Kentemata:
+    case QuantitativeNeume.OligonPlusKentemata:
+    case QuantitativeNeume.OligonPlusHamiliPlusKentemata:
+    case QuantitativeNeume.OligonPlusIsonPlusKentemata:
+    case QuantitativeNeume.OligonPlusElaphronPlusKentemata:
+    case QuantitativeNeume.OligonPlusApostrophosPlusKentemata:
+    case QuantitativeNeume.OligonPlusElaphronPlusApostrophosPlusKentemata:
+      return true;
+  }
+  return false;
+}
+
+export function getKlasmaType(quantitativeNeume: QuantitativeNeume): KlasmaType {
+  if (isKlasmaDisabledNeume(quantitativeNeume)) {
+    return KlasmaType.NO_KLASMA;
+  }
+  if (isTopKlasmaOnlyNeume(quantitativeNeume)) {
+    return KlasmaType.KLASMA_TOP;
+  }
+  if (isBottomKlasmaOnlyNeume(quantitativeNeume)) {
+    return KlasmaType.KLASMA_BOTTOM;
+  }
+  return KlasmaType.KLASMA_BOTH;
+}
+
+// other time neumes
+export const isHapleDisabled = isKlasmaDisabledNeume;
+export const isKoronisDisabled = isKlasmaDisabledNeume;
