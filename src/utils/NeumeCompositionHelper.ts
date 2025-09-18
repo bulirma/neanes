@@ -1,8 +1,8 @@
 import {
-  //Accidental,
+  Accidental,
   //Fthora,
   GorgonNeume,
-  //MeasureBar,
+  MeasureBar,
   //Ison,
   //Letter,
   //MeasureBar,
@@ -15,10 +15,11 @@ import {
   //TempoSign,
   //Tie,
   TimeNeume,
-  //VocalExpressionNeume,
+  VocalExpressionNeume,
 } from '@/models/Neumes';
 
 const allGorgonNeumes = Object.values(GorgonNeume);
+const allAccidentalNeumes = Object.values(Accidental);
 
 export const allQuantitativeNeumes = Object.values(QuantitativeNeume);
 export const primaryGorgonNeumes = allGorgonNeumes.slice(0, 12);
@@ -26,9 +27,11 @@ export const secondaryGorgonNeumes = allGorgonNeumes.slice(12, 23);
 export const slowGorgonNeumes = Object.values(GorgonNeume).slice(23);
 export const allTimeNeumes = Object.values(TimeNeume);
 export const hapleNeumes = allTimeNeumes.slice(2, 6);
-//const allVocalExpressionNeumes = Object.values(VocalExpressionNeume);
-//const allAccidentalNeumes = Object.values(Accidental);
-//const allMeasureBars = Object.values(MeasureBar);
+export const allVocalExpressionNeumes = Object.values(VocalExpressionNeume);
+export const primaryAccidentalNeumes = allAccidentalNeumes.slice(0, 4).concat(allAccidentalNeumes.slice(12, 16));
+export const secondaryAccidentalNeumes = allAccidentalNeumes.slice(4, 8).concat(allAccidentalNeumes.slice(16, 20));
+export const tertiaryAccidentalNeumes = allAccidentalNeumes.slice(8, 12).concat(allAccidentalNeumes.slice(20, 24));
+export const allMeasureBars = Object.values(MeasureBar);
 //const allFthoras = Object.values(Fthora);
 //const allIsons = Object.values(Ison);
 //const allTempoSigns = Object.values(TempoSign);

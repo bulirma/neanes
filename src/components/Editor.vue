@@ -2592,6 +2592,23 @@ export default class Editor extends Vue {
       console.log(element);
       this.save();
     }
+    //await this.saveWorkspaceWithTimeStamp();
+    //const workspace = this.selectedWorkspace;
+    //this.onFileMenuNewScore();
+    //await this.closeWorkspace(workspace);
+  }
+
+  generateTest() {
+    this.selectedElement = this.elements[this.elements.length - 1];
+    const element = this.randomNeumeGenerator.test();
+    element.lyricsColor = this.score.pageSetup.lyricsDefaultColor;
+    element.lyricsFontFamily = this.score.pageSetup.lyricsDefaultFontFamily;
+    element.lyricsFontSize = this.score.pageSetup.lyricsDefaultFontSize;
+    element.lyricsFontStyle = this.score.pageSetup.lyricsDefaultFontStyle;
+    element.lyricsFontWeight = this.score.pageSetup.lyricsDefaultFontWeight;
+    element.lyricsStrokeWidth = this.score.pageSetup.lyricsDefaultStrokeWidth;
+    this.addScoreElement(element, this.elements.length - 1);
+    this.save();
   }
 
   getElementIndex(element: ScoreElement) {
