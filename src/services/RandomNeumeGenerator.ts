@@ -110,11 +110,15 @@ export class UniformRandomNeumeGenerator {
 
   genPrimaryGorgonNeume(
     quantitativeNeume: QuantitativeNeume,
+    vocanExpressionNeume: VocalExpressionNeume | null,
   ): GorgonNeume | null {
     if (includesPetasti(quantitativeNeume)) {
       return null;
     }
-    // TODO: must not be on psefiston except for oligon with kentamata below
+    if (vocanExpressionNeume === VocalExpressionNeume.Psifiston &&
+        quantitativeNeume !== QuantitativeNeume.KentemataPlusOligon) {
+      return null;
+    }
     const includeSlow = quantitativeNeume === QuantitativeNeume.KentemataPlusOligon;
     const gorgonSettings: GorgonIndexSetting = {
       omitBottom: false,
@@ -135,11 +139,15 @@ export class UniformRandomNeumeGenerator {
 
   genSecondaryGorgonNeume(
     quantitativeNeume: QuantitativeNeume,
+    vocanExpressionNeume: VocalExpressionNeume | null,
   ): GorgonNeume | null {
     if (includesPetasti(quantitativeNeume)) {
       return null;
     }
-    // TODO: must not be on psefiston except for oligon with kentamata below
+    if (vocanExpressionNeume === VocalExpressionNeume.Psifiston &&
+        quantitativeNeume !== QuantitativeNeume.KentemataPlusOligon) {
+      return null;
+    }
     if (getSecondaryNeume(quantitativeNeume) === null) {
       return null;
     }
@@ -224,10 +232,10 @@ export class UniformRandomNeumeGenerator {
   next(): ScoreElement {
     const score = new NoteElement();
     const quantitativeNeume = this.genQuantitativeNeume();
-    const gorgonNeume = this.genPrimaryGorgonNeume(quantitativeNeume);
-    const secondaryGorgonNeume = this.genSecondaryGorgonNeume(quantitativeNeume);
-    const timeNeume = this.genTimeNeume(quantitativeNeume);
     const vocalExpressionNeume = this.genVocalExpressionNeume(quantitativeNeume);
+    const gorgonNeume = this.genPrimaryGorgonNeume(quantitativeNeume, vocalExpressionNeume);
+    const secondaryGorgonNeume = this.genSecondaryGorgonNeume(quantitativeNeume, vocalExpressionNeume);
+    const timeNeume = this.genTimeNeume(quantitativeNeume);
     const accidentalNeume = this.genPrimaryAccidentalNeume(quantitativeNeume);
     const secondaryAccidentalNeume = this.genSecondaryAccidentalNeume(quantitativeNeume);
     const tertiaryAccidentalNeume = this.genTertiaryAccidentalNeume(quantitativeNeume);
