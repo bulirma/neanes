@@ -2593,6 +2593,14 @@ export default class Editor extends Vue {
       this.save();
     }
     //await this.saveWorkspaceWithTimeStamp();
+    // or use the 2 lines below to export as latex
+    //const args = {
+    //  options: {
+    //    includeModeKeys: false,
+    //    includeTextBoxes: false,
+    //  } as LatexExporterOptions,
+    //};
+    //await this.exportAsLatex(args as ExportAsLatexSettings)
     //const workspace = this.selectedWorkspace;
     //this.onFileMenuNewScore();
     //await this.closeWorkspace(workspace);
