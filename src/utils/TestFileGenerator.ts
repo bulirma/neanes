@@ -70,8 +70,12 @@ export abstract class TestFileGenerator {
       if (
         [
           QuantitativeNeume.VareiaDotted,
+          QuantitativeNeume.VareiaDotted2,
+          QuantitativeNeume.VareiaDotted3,
+          QuantitativeNeume.VareiaDotted4,
           QuantitativeNeume.Cross,
           QuantitativeNeume.Kentima,
+          QuantitativeNeume.Breath,
         ].includes(quantitativeNeume)
       ) {
         continue;
@@ -143,9 +147,12 @@ export abstract class TestFileGenerator {
       const quantitativeNeume = q as QuantitativeNeume;
       if (
         [
-          QuantitativeNeume.VareiaDotted,
+          QuantitativeNeume.VareiaDotted2,
+          QuantitativeNeume.VareiaDotted3,
+          QuantitativeNeume.VareiaDotted4,
           QuantitativeNeume.Cross,
           QuantitativeNeume.Kentima,
+          QuantitativeNeume.Breath,
         ].includes(quantitativeNeume)
       ) {
         continue;
@@ -162,9 +169,12 @@ export abstract class TestFileGenerator {
       const quantitativeNeume = q as QuantitativeNeume;
       if (
         [
-          QuantitativeNeume.VareiaDotted,
+          QuantitativeNeume.VareiaDotted2,
+          QuantitativeNeume.VareiaDotted3,
+          QuantitativeNeume.VareiaDotted4,
           QuantitativeNeume.Cross,
           QuantitativeNeume.Kentima,
+          QuantitativeNeume.Breath,
         ].includes(quantitativeNeume)
       ) {
         continue;
@@ -181,9 +191,12 @@ export abstract class TestFileGenerator {
       const quantitativeNeume = q as QuantitativeNeume;
       if (
         [
-          QuantitativeNeume.VareiaDotted,
+          QuantitativeNeume.VareiaDotted2,
+          QuantitativeNeume.VareiaDotted3,
+          QuantitativeNeume.VareiaDotted4,
           QuantitativeNeume.Cross,
           QuantitativeNeume.Kentima,
+          QuantitativeNeume.Breath,
         ].includes(quantitativeNeume)
       ) {
         continue;
@@ -200,9 +213,12 @@ export abstract class TestFileGenerator {
       const quantitativeNeume = q as QuantitativeNeume;
       if (
         [
-          QuantitativeNeume.VareiaDotted,
+          QuantitativeNeume.VareiaDotted2,
+          QuantitativeNeume.VareiaDotted3,
+          QuantitativeNeume.VareiaDotted4,
           QuantitativeNeume.Cross,
           QuantitativeNeume.Kentima,
+          QuantitativeNeume.Breath,
         ].includes(quantitativeNeume)
       ) {
         continue;
@@ -228,8 +244,12 @@ export abstract class TestFileGenerator {
       if (
         [
           QuantitativeNeume.VareiaDotted,
+          QuantitativeNeume.VareiaDotted2,
+          QuantitativeNeume.VareiaDotted3,
+          QuantitativeNeume.VareiaDotted4,
           QuantitativeNeume.Cross,
           QuantitativeNeume.Kentima,
+          QuantitativeNeume.Breath,
         ].includes(quantitativeNeume)
       ) {
         continue;
@@ -247,8 +267,12 @@ export abstract class TestFileGenerator {
       if (
         [
           QuantitativeNeume.VareiaDotted,
+          QuantitativeNeume.VareiaDotted2,
+          QuantitativeNeume.VareiaDotted3,
+          QuantitativeNeume.VareiaDotted4,
           QuantitativeNeume.Cross,
           QuantitativeNeume.Kentima,
+          QuantitativeNeume.Breath,
         ].includes(quantitativeNeume)
       ) {
         continue;
@@ -274,8 +298,12 @@ export abstract class TestFileGenerator {
       if (
         [
           QuantitativeNeume.VareiaDotted,
+          QuantitativeNeume.VareiaDotted2,
+          QuantitativeNeume.VareiaDotted3,
+          QuantitativeNeume.VareiaDotted4,
           QuantitativeNeume.Cross,
           QuantitativeNeume.Kentima,
+          QuantitativeNeume.Breath,
         ].includes(quantitativeNeume)
       ) {
         continue;
@@ -293,8 +321,12 @@ export abstract class TestFileGenerator {
       if (
         [
           QuantitativeNeume.VareiaDotted,
+          QuantitativeNeume.VareiaDotted2,
+          QuantitativeNeume.VareiaDotted3,
+          QuantitativeNeume.VareiaDotted4,
           QuantitativeNeume.Cross,
           QuantitativeNeume.Kentima,
+          QuantitativeNeume.Breath,
         ].includes(quantitativeNeume)
       ) {
         continue;
@@ -312,8 +344,12 @@ export abstract class TestFileGenerator {
       if (
         [
           QuantitativeNeume.VareiaDotted,
+          QuantitativeNeume.VareiaDotted2,
+          QuantitativeNeume.VareiaDotted3,
+          QuantitativeNeume.VareiaDotted4,
           QuantitativeNeume.Cross,
           QuantitativeNeume.Kentima,
+          QuantitativeNeume.Breath,
         ].includes(quantitativeNeume)
       ) {
         continue;
@@ -339,8 +375,12 @@ export abstract class TestFileGenerator {
       if (
         [
           QuantitativeNeume.VareiaDotted,
+          QuantitativeNeume.VareiaDotted2,
+          QuantitativeNeume.VareiaDotted3,
+          QuantitativeNeume.VareiaDotted4,
           QuantitativeNeume.Cross,
           QuantitativeNeume.Kentima,
+          QuantitativeNeume.Breath,
         ].includes(quantitativeNeume)
       ) {
         continue;
@@ -370,8 +410,12 @@ export abstract class TestFileGenerator {
       if (
         [
           QuantitativeNeume.VareiaDotted,
+          QuantitativeNeume.VareiaDotted2,
+          QuantitativeNeume.VareiaDotted3,
+          QuantitativeNeume.VareiaDotted4,
           QuantitativeNeume.Cross,
           QuantitativeNeume.Kentima,
+          QuantitativeNeume.Breath,
         ].includes(quantitativeNeume)
       ) {
         continue;
@@ -409,8 +453,12 @@ export abstract class TestFileGenerator {
       if (
         [
           QuantitativeNeume.VareiaDotted,
+          QuantitativeNeume.VareiaDotted2,
+          QuantitativeNeume.VareiaDotted3,
+          QuantitativeNeume.VareiaDotted4,
           QuantitativeNeume.Cross,
           QuantitativeNeume.Kentima,
+          QuantitativeNeume.Breath,
         ].includes(quantitativeNeume)
       ) {
         continue;
@@ -428,8 +476,12 @@ export abstract class TestFileGenerator {
       if (
         [
           QuantitativeNeume.VareiaDotted,
+          QuantitativeNeume.VareiaDotted2,
+          QuantitativeNeume.VareiaDotted3,
+          QuantitativeNeume.VareiaDotted4,
           QuantitativeNeume.Cross,
           QuantitativeNeume.Kentima,
+          QuantitativeNeume.Breath,
         ].includes(quantitativeNeume)
       ) {
         continue;
@@ -447,8 +499,12 @@ export abstract class TestFileGenerator {
       if (
         [
           QuantitativeNeume.VareiaDotted,
+          QuantitativeNeume.VareiaDotted2,
+          QuantitativeNeume.VareiaDotted3,
+          QuantitativeNeume.VareiaDotted4,
           QuantitativeNeume.Cross,
           QuantitativeNeume.Kentima,
+          QuantitativeNeume.Breath,
         ].includes(quantitativeNeume)
       ) {
         continue;
@@ -466,8 +522,12 @@ export abstract class TestFileGenerator {
       if (
         [
           QuantitativeNeume.VareiaDotted,
+          QuantitativeNeume.VareiaDotted2,
+          QuantitativeNeume.VareiaDotted3,
+          QuantitativeNeume.VareiaDotted4,
           QuantitativeNeume.Cross,
           QuantitativeNeume.Kentima,
+          QuantitativeNeume.Breath,
         ].includes(quantitativeNeume)
       ) {
         continue;
@@ -489,8 +549,12 @@ export abstract class TestFileGenerator {
       if (
         [
           QuantitativeNeume.VareiaDotted,
+          QuantitativeNeume.VareiaDotted2,
+          QuantitativeNeume.VareiaDotted3,
+          QuantitativeNeume.VareiaDotted4,
           QuantitativeNeume.Cross,
           QuantitativeNeume.Kentima,
+          QuantitativeNeume.Breath,
         ].includes(quantitativeNeume)
       ) {
         continue;
@@ -520,8 +584,12 @@ export abstract class TestFileGenerator {
       if (
         [
           QuantitativeNeume.VareiaDotted,
+          QuantitativeNeume.VareiaDotted2,
+          QuantitativeNeume.VareiaDotted3,
+          QuantitativeNeume.VareiaDotted4,
           QuantitativeNeume.Cross,
           QuantitativeNeume.Kentima,
+          QuantitativeNeume.Breath,
         ].includes(quantitativeNeume)
       ) {
         continue;
@@ -539,8 +607,12 @@ export abstract class TestFileGenerator {
       if (
         [
           QuantitativeNeume.VareiaDotted,
+          QuantitativeNeume.VareiaDotted2,
+          QuantitativeNeume.VareiaDotted3,
+          QuantitativeNeume.VareiaDotted4,
           QuantitativeNeume.Cross,
           QuantitativeNeume.Kentima,
+          QuantitativeNeume.Breath,
         ].includes(quantitativeNeume)
       ) {
         continue;
@@ -566,8 +638,12 @@ export abstract class TestFileGenerator {
       if (
         [
           QuantitativeNeume.VareiaDotted,
+          QuantitativeNeume.VareiaDotted2,
+          QuantitativeNeume.VareiaDotted3,
+          QuantitativeNeume.VareiaDotted4,
           QuantitativeNeume.Cross,
           QuantitativeNeume.Kentima,
+          QuantitativeNeume.Breath,
         ].includes(quantitativeNeume)
       ) {
         continue;
@@ -593,8 +669,12 @@ export abstract class TestFileGenerator {
       if (
         [
           QuantitativeNeume.VareiaDotted,
+          QuantitativeNeume.VareiaDotted2,
+          QuantitativeNeume.VareiaDotted3,
+          QuantitativeNeume.VareiaDotted4,
           QuantitativeNeume.Cross,
           QuantitativeNeume.Kentima,
+          QuantitativeNeume.Breath,
         ].includes(quantitativeNeume)
       ) {
         continue;

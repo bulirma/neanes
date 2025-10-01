@@ -76,8 +76,13 @@ const bottomAllowedGorgonNeumes: Neume[] = [
 
 const bottomOnlyKlasmaNeumes: Neume[] = [
   ...petastiNeumes,
-
   QuantitativeNeume.OligonPlusDoubleHypsili,
+  QuantitativeNeume.OligonKentimataDoubleYpsili,
+  QuantitativeNeume.OligonKentimaDoubleYpsiliRight,
+  QuantitativeNeume.OligonKentimaDoubleYpsiliLeft,
+  QuantitativeNeume.OligonTripleYpsili,
+  QuantitativeNeume.OligonKentimataTripleYpsili,
+  QuantitativeNeume.OligonKentimaTripleYpsili,
   QuantitativeNeume.OligonPlusApostrophos,
   QuantitativeNeume.OligonPlusElaphron,
   QuantitativeNeume.OligonPlusElaphronPlusApostrophos,
@@ -97,6 +102,10 @@ const topOnlyKlasmaNeumes: Neume[] = [
   QuantitativeNeume.HamiliPlusElaphron,
   QuantitativeNeume.HamiliPlusElaphronPlusApostrophos,
   QuantitativeNeume.DoubleHamili,
+  QuantitativeNeume.DoubleHamiliApostrofos,
+  QuantitativeNeume.DoubleHamiliElafron,
+  QuantitativeNeume.DoubleHamiliElafronApostrofos,
+  QuantitativeNeume.TripleHamili,
   QuantitativeNeume.Apostrophos,
   QuantitativeNeume.Elaphron,
   QuantitativeNeume.ElaphronPlusApostrophos,
@@ -362,7 +371,10 @@ export const timeReplacementMap = new Map<
     TimeNeume.Hapli,
     [
       {
-        isPairedWith: [...kentemataNeumes],
+        isPairedWith: [
+          ...kentemataNeumes,
+          QuantitativeNeume.PetastiPlusRunningElaphron,
+        ],
         replaceWith: null,
       },
     ],
@@ -432,8 +444,8 @@ export const vocalExpressionReplacementMap = new Map<
     [
       {
         isPairedWith: [
+          ...kentemataNeumes,
           ...rests,
-          QuantitativeNeume.Kentemata,
           QuantitativeNeume.IsonPlusApostrophos,
           QuantitativeNeume.DoubleApostrophos,
           QuantitativeNeume.PetastiPlusRunningElaphron,
