@@ -1,4 +1,5 @@
 import { NoteElement, ScoreElement } from '@/models/Element';
+import { getSecondaryNeume } from '@/models/NeumeReplacements';
 import {
   Accidental,
   GorgonNeume,
@@ -8,7 +9,6 @@ import {
   TimeNeume,
   VocalExpressionNeume,
 } from '@/models/Neumes';
-import { getSecondaryNeume } from '@/models/NeumeReplacements';
 import {
   allMeasureBars,
   allQuantitativeNeumes,
@@ -30,7 +30,7 @@ import {
   secondaryGorgonNeumes,
   slowGorgonNeumes,
   tertiaryAccidentalNeumes,
-  TimeIndexSettings
+  TimeIndexSettings,
 } from '@/utils/NeumeCompositionHelper';
 
 export class UniformRandomNeumeGenerator {
@@ -63,9 +63,7 @@ export class UniformRandomNeumeGenerator {
     return Math.floor(Math.random() * (secondaryGorgonNeumes.length + 1)) - 1;
   }
 
-  randomTimeNeumeIndex(
-    timeSettings: TimeIndexSettings
-  ): number {
+  randomTimeNeumeIndex(timeSettings: TimeIndexSettings): number {
     let range = allTimeNeumes.length + 1;
     if (timeSettings.hapleDisabled) {
       range -= 4;
@@ -85,7 +83,9 @@ export class UniformRandomNeumeGenerator {
   }
 
   randomVocalExpressionNeumeIndex(): number {
-    return Math.floor(Math.random() * (allVocalExpressionNeumes.length + 1)) - 1;
+    return (
+      Math.floor(Math.random() * (allVocalExpressionNeumes.length + 1)) - 1
+    );
   }
 
   randomPrimaryAccidentalNeumeIndex(): number {
@@ -93,11 +93,15 @@ export class UniformRandomNeumeGenerator {
   }
 
   randomSecondaryAccidentalNeumeIndex(): number {
-    return Math.floor(Math.random() * (secondaryAccidentalNeumes.length + 1)) - 1;
+    return (
+      Math.floor(Math.random() * (secondaryAccidentalNeumes.length + 1)) - 1
+    );
   }
 
   randomTertiaryAccidentalNeumeIndex(): number {
-    return Math.floor(Math.random() * (tertiaryAccidentalNeumes.length + 1)) - 1;
+    return (
+      Math.floor(Math.random() * (tertiaryAccidentalNeumes.length + 1)) - 1
+    );
   }
 
   randomMeasureBarNeumeIndex(): number {
@@ -115,14 +119,17 @@ export class UniformRandomNeumeGenerator {
     if (includesPetasti(quantitativeNeume)) {
       return null;
     }
-    if (vocanExpressionNeume === VocalExpressionNeume.Psifiston &&
-        quantitativeNeume !== QuantitativeNeume.KentemataPlusOligon) {
+    if (
+      vocanExpressionNeume === VocalExpressionNeume.Psifiston &&
+      quantitativeNeume !== QuantitativeNeume.KentemataPlusOligon
+    ) {
       return null;
     }
-    const includeSlow = quantitativeNeume === QuantitativeNeume.KentemataPlusOligon;
+    const includeSlow =
+      quantitativeNeume === QuantitativeNeume.KentemataPlusOligon;
     const gorgonSettings: GorgonIndexSetting = {
       omitBottom: false,
-      includeSlow: includeSlow
+      includeSlow: includeSlow,
     };
     if (
       isCompoundNeume(quantitativeNeume) ||
@@ -144,8 +151,10 @@ export class UniformRandomNeumeGenerator {
     if (includesPetasti(quantitativeNeume)) {
       return null;
     }
-    if (vocanExpressionNeume === VocalExpressionNeume.Psifiston &&
-        quantitativeNeume !== QuantitativeNeume.KentemataPlusOligon) {
+    if (
+      vocanExpressionNeume === VocalExpressionNeume.Psifiston &&
+      quantitativeNeume !== QuantitativeNeume.KentemataPlusOligon
+    ) {
       return null;
     }
     if (getSecondaryNeume(quantitativeNeume) === null) {
@@ -155,9 +164,7 @@ export class UniformRandomNeumeGenerator {
     return randomIndex < 0 ? null : secondaryGorgonNeumes[randomIndex];
   }
 
-  genTimeNeume(
-    quantitativeNeume: QuantitativeNeume,
-  ): TimeNeume | null {
+  genTimeNeume(quantitativeNeume: QuantitativeNeume): TimeNeume | null {
     // TODO: also disable for rest neumes
     const timeSettings: TimeIndexSettings = {
       klasmaType: getKlasmaType(quantitativeNeume),
@@ -169,10 +176,16 @@ export class UniformRandomNeumeGenerator {
       return null;
     }
     let enabledNeumes = [];
-    if (timeSettings.klasmaType === KlasmaType.KLASMA_BOTH || timeSettings.klasmaType === KlasmaType.KLASMA_TOP) {
+    if (
+      timeSettings.klasmaType === KlasmaType.KLASMA_BOTH ||
+      timeSettings.klasmaType === KlasmaType.KLASMA_TOP
+    ) {
       enabledNeumes.push(TimeNeume.Klasma_Top);
     }
-    if (timeSettings.klasmaType === KlasmaType.KLASMA_BOTH || timeSettings.klasmaType === KlasmaType.KLASMA_BOTTOM) {
+    if (
+      timeSettings.klasmaType === KlasmaType.KLASMA_BOTH ||
+      timeSettings.klasmaType === KlasmaType.KLASMA_BOTTOM
+    ) {
       enabledNeumes.push(TimeNeume.Klasma_Bottom);
     }
     if (!timeSettings.hapleDisabled) {
@@ -232,13 +245,22 @@ export class UniformRandomNeumeGenerator {
   next(): ScoreElement {
     const score = new NoteElement();
     const quantitativeNeume = this.genQuantitativeNeume();
-    const vocalExpressionNeume = this.genVocalExpressionNeume(quantitativeNeume);
-    const gorgonNeume = this.genPrimaryGorgonNeume(quantitativeNeume, vocalExpressionNeume);
-    const secondaryGorgonNeume = this.genSecondaryGorgonNeume(quantitativeNeume, vocalExpressionNeume);
+    const vocalExpressionNeume =
+      this.genVocalExpressionNeume(quantitativeNeume);
+    const gorgonNeume = this.genPrimaryGorgonNeume(
+      quantitativeNeume,
+      vocalExpressionNeume,
+    );
+    const secondaryGorgonNeume = this.genSecondaryGorgonNeume(
+      quantitativeNeume,
+      vocalExpressionNeume,
+    );
     const timeNeume = this.genTimeNeume(quantitativeNeume);
     const accidentalNeume = this.genPrimaryAccidentalNeume(quantitativeNeume);
-    const secondaryAccidentalNeume = this.genSecondaryAccidentalNeume(quantitativeNeume);
-    const tertiaryAccidentalNeume = this.genTertiaryAccidentalNeume(quantitativeNeume);
+    const secondaryAccidentalNeume =
+      this.genSecondaryAccidentalNeume(quantitativeNeume);
+    const tertiaryAccidentalNeume =
+      this.genTertiaryAccidentalNeume(quantitativeNeume);
     const attrs = {
       quantitativeNeume: quantitativeNeume,
       gorgonNeume: gorgonNeume,
@@ -247,7 +269,7 @@ export class UniformRandomNeumeGenerator {
       vocalExpressionNeume: vocalExpressionNeume,
       accidental: accidentalNeume,
       secondaryAccidental: secondaryAccidentalNeume,
-      tertiaryAccidental: tertiaryAccidentalNeume
+      tertiaryAccidental: tertiaryAccidentalNeume,
     };
     Object.assign(score, attrs);
     return score;
