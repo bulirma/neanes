@@ -2721,60 +2721,49 @@ export default class Editor extends Vue {
     this.audioService.dispose();
   }
 
-  async saveWorkspaceWithTimeStamp(compress: boolean = false) {
-    const workspace = this.selectedWorkspace;
+  nameWorkspaceWithTimestamp(compress: boolean = false) {
     const currentTime = new Date();
     const extension = compress ? '.byz' : '.byzx';
-    workspace.filePath = currentTime.toISOString() + extension;
+    this.selectedWorkspace.filePath = currentTime.toISOString() + extension;
+  }
 
+  async saveNamedWorkspace() {
     const result = await this.saveWorkspaceAs(workspace);
     if (result.success) {
-      workspace.filePath = result.filePath;
-      workspace.hasUnsavedChanges = false;
+      this.selectedWorkspace.filePath = result.filePath;
+      this.selectedWorkspace.hasUnsavedChanges = false;
     }
   }
 
   async generateRandomPage() {
     // generating random neumes
     // first there is need to select the last element, but do not do that after inserting
+    this.nameWorkspaceWithTimestamp();
     this.selectedElement = this.elements[this.elements.length - 1];
     for (let i = 0; i < 145; ++i) {
       const element = this.randomNeumeGenerator.next();
-      element.lyricsColor = this.score.pageSetup.lyricsDefaultColor;
-      element.lyricsFontFamily = this.score.pageSetup.lyricsDefaultFontFamily;
-      element.lyricsFontSize = this.score.pageSetup.lyricsDefaultFontSize;
-      element.lyricsFontStyle = this.score.pageSetup.lyricsDefaultFontStyle;
-      element.lyricsFontWeight = this.score.pageSetup.lyricsDefaultFontWeight;
-      element.lyricsStrokeWidth = this.score.pageSetup.lyricsDefaultStrokeWidth;
+      //element.lyricsColor = this.score.pageSetup.lyricsDefaultColor;
+      //element.lyricsFontFamily = this.score.pageSetup.lyricsDefaultFontFamily;
+      //element.lyricsFontSize = this.score.pageSetup.lyricsDefaultFontSize;
+      //element.lyricsFontStyle = this.score.pageSetup.lyricsDefaultFontStyle;
+      //element.lyricsFontWeight = this.score.pageSetup.lyricsDefaultFontWeight;
+      //element.lyricsStrokeWidth = this.score.pageSetup.lyricsDefaultStrokeWidth;
       this.addScoreElement(element, this.elements.length - 1);
-      console.log(element);
+      //console.log(element);
       this.save();
+      //await ((ms) => new Promise(resolve => setTimeout(resolve, ms)))(100);
     }
-    //await this.saveWorkspaceWithTimeStamp();
-    // or use the 2 lines below to export as latex
-    //const args = {
-    //  options: {
-    //    includeModeKeys: false,
-    //    includeTextBoxes: false,
-    //  } as LatexExporterOptions,
-    //};
-    //await this.exportAsLatex(args as ExportAsLatexSettings)
+
+    const settings = {
+      dpi: 300,
+      openFolder: false,
+      transparentBackground: false
+    } as ExportAsPngSettings;
+    await this.exportAsNamedPng(settings);
+
     //const workspace = this.selectedWorkspace;
     //this.onFileMenuNewScore();
     //await this.closeWorkspace(workspace);
-  }
-
-  generateTest() {
-    this.selectedElement = this.elements[this.elements.length - 1];
-    const element = this.randomNeumeGenerator.test();
-    element.lyricsColor = this.score.pageSetup.lyricsDefaultColor;
-    element.lyricsFontFamily = this.score.pageSetup.lyricsDefaultFontFamily;
-    element.lyricsFontSize = this.score.pageSetup.lyricsDefaultFontSize;
-    element.lyricsFontStyle = this.score.pageSetup.lyricsDefaultFontStyle;
-    element.lyricsFontWeight = this.score.pageSetup.lyricsDefaultFontWeight;
-    element.lyricsStrokeWidth = this.score.pageSetup.lyricsDefaultStrokeWidth;
-    this.addScoreElement(element, this.elements.length - 1);
-    this.save();
   }
 
   getElementIndex(element: ScoreElement) {
@@ -7030,6 +7019,8 @@ export default class Editor extends Vue {
         'png',
       );
 
+      console.log(reply);
+
       if (!reply.success) {
         return;
       }
@@ -7068,6 +7059,7 @@ export default class Editor extends Vue {
             let data = await toPng(page, options);
 
             if (data != null) {
+              console.log(Date.now());
               const fileName = reply.filePath.replace(
                 /\.png$/,
                 `-${pageNumber++}.png`,
@@ -7086,6 +7078,56 @@ export default class Editor extends Vue {
           await this.ipcService.showItemInFolder(
             reply.filePath.replace(/\.png$/, '-1.png'),
           );
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        this.printMode = false;
+        this.exportInProgress = false;
+        this.closeExportDialog();
+        // Re-focus the active element
+        this.focusElement(activeElement);
+      }
+    });
+  }
+
+  // automatically generate images
+  async exportAsNamedPng(args: ExportAsPngSettings) {
+    const filePath = this.selectedWorkspace.filePath;
+
+    this.printMode = true;
+    this.exportInProgress = true;
+
+    // Blur the active element so that focus outlines and
+    // blinking cursors don't show up in the printed page
+    const activeElement = this.blurActiveElement();
+
+    nextTick(async () => {
+      try {
+        const pages = this.$refs.pages as HTMLElement[];
+
+        if (pages.length > 0) {
+          const page = pages[0];
+          const fontEmbedCSS = await getFontEmbedCSS(page);
+
+          const options = {
+            fontEmbedCSS,
+            pixelRatio: args.dpi / 96,
+            style: { margin: '0' },
+          } as any;
+
+          if (args.transparentBackground) {
+            options.style.backgroundColor = 'transparent';
+          }
+
+          console.log(Date.now());
+          let data = await toPng(page, options);
+
+          if (data != null) {
+            console.log(Date.now());
+            data = data.replace(/^data:image\/png;base64,/, '');
+            await this.ipcService.exportPageAsImage(filePath, data)
+          }
         }
       } catch (error) {
         console.error(error);
