@@ -1,4 +1,5 @@
 import { PageSize } from '@/models/PageSetup';
+import { BatchConfig } from '@/models/random-distribution/Config';
 import { Score } from '@/models/save/v1/Score';
 
 export enum IpcMainChannels {
@@ -54,6 +55,8 @@ export enum IpcMainChannels {
 }
 
 export enum IpcRendererChannels {
+  GetBatchConfig = 'GetBatchConfig',
+
   SetCanUndo = 'SetCanUndo',
   SetCanRedo = 'SetCanRedo',
 
@@ -142,6 +145,11 @@ export interface SaveWorkspaceAsArgs {
 export interface SaveWorkspaceAsReplyArgs {
   filePath: string;
   success: boolean;
+}
+
+export interface BatchConfigReplyArgs {
+  success: boolean;
+  contents: BatchConfig | null;
 }
 
 export interface SaveWorkspaceReplyArgs {

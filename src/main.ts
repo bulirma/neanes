@@ -1,6 +1,7 @@
 import './registerServiceWorker';
 
 import { CkeditorPlugin } from '@ckeditor/ckeditor5-vue';
+//import { app as electronApp, BrowserWindow } from 'electron';
 import i18next from 'i18next';
 import LanguageDetector from 'i18next-browser-languagedetector';
 import Pseudo from 'i18next-pseudo';
@@ -23,6 +24,24 @@ import { LyricService } from './services/LyricService';
 import { UniformRandomNeumeGenerator } from './services/RandomNeumeGenerator';
 import { TextSearchService } from './services/TextSearchService';
 import { isElectron } from './utils/isElectron';
+
+//function createWindow() {
+//  const win = new BrowserWindow({
+//    show: false,
+//    webPreferences: {
+//      nodeIntegration: true,
+//      contextIsolation: false,
+//    },
+//  });
+//
+//  if (process.env.VITE_DEV_SERVER_URL !== undefined) {
+//    win.loadURL(process.env.VITE_DEV_SERVER_URL);
+//  }
+//
+//  win.webContents.on('did-finish-load', () => {
+//    console.log('Vue app loaded in headless mode');
+//  });
+//}
 
 if (isElectron()) {
   initializeIpcListeners();
@@ -69,18 +88,28 @@ app.provide('musicXmlExporter', new MusicXmlExporter());
 app.provide('randomNeumeGenerator', new UniformRandomNeumeGenerator());
 app.use(router);
 app.use(I18NextVue, { i18next });
+
+//if (isElectron()) {
+//  electronApp.whenReady().then(() => {
+//    createWindow();
+//
+//    electronApp.on('activate', () => {
+//      if (BrowserWindow.getAllWindows().length === 0) {
+//        createWindow();
+//      }
+//    });
+//  });
+//
+//  electronApp.on('window-all-closed', () => {
+//    electronApp.quit();
+//  });
+//}
+
 app.mount('#app');
 
-
-//(window as any).makeControlsAvailable = function () {
-//    (window as any).controls = {
-//        quantNeumeBtns: document.querySelectorAll('.neume-selector-panel .neume')
-//    };
-//};
-
 (window as any).generateRandomPages = function (n: number) {
-    const editor = (window as any).editorInstance;
-    for (let i = 0; i < n; ++i) {
-        editor.generateRandomPage();
-    }
+  const editor = (window as any).editorInstance;
+  for (let i = 0; i < n; ++i) {
+    editor.generateRandomPage();
+  }
 };

@@ -2464,9 +2464,6 @@ export default class Editor extends Vue {
   }
 
   mounted() {
-    // hack to access this component globally
-    (window as any).editorInstance = this;
-
     const savedAudioOptions = localStorage.getItem('audioOptionsDefault');
 
     if (savedAudioOptions != null) {
@@ -2596,6 +2593,14 @@ export default class Editor extends Vue {
     );
 
     EventBus.$on(AudioServiceEventNames.Stop, this.onAudioServiceStop);
+
+    // hack to access this component globally
+    (window as any).editorInstance = this;
+
+    this.ipcService.getBatchConfig()
+      .then(config => {
+        console.log(config);
+      });
   }
 
   beforeUnmount() {

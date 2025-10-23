@@ -1,4 +1,5 @@
 import {
+  BatchConfigReplyArgs,
   ExportWorkspaceAsImageReplyArgs,
   OpenContextMenuForTabArgs,
   OpenWorkspaceFromArgvArgs,
@@ -10,6 +11,8 @@ import {
 import { Workspace } from '@/models/Workspace';
 
 export interface IIpcService {
+  getBatchConfig(): Promise<BatchConfigReplyArgs>;
+
   saveWorkspace(workspace: Workspace): Promise<SaveWorkspaceReplyArgs>;
 
   saveWorkspaceAs(workspace: Workspace): Promise<SaveWorkspaceAsReplyArgs>;

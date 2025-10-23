@@ -28,9 +28,15 @@ export const slowGorgonNeumes = Object.values(GorgonNeume).slice(23);
 export const allTimeNeumes = Object.values(TimeNeume);
 export const hapleNeumes = allTimeNeumes.slice(2, 6);
 export const allVocalExpressionNeumes = Object.values(VocalExpressionNeume);
-export const primaryAccidentalNeumes = allAccidentalNeumes.slice(0, 4).concat(allAccidentalNeumes.slice(12, 16));
-export const secondaryAccidentalNeumes = allAccidentalNeumes.slice(4, 8).concat(allAccidentalNeumes.slice(16, 20));
-export const tertiaryAccidentalNeumes = allAccidentalNeumes.slice(8, 12).concat(allAccidentalNeumes.slice(20, 24));
+export const primaryAccidentalNeumes = allAccidentalNeumes
+  .slice(0, 4)
+  .concat(allAccidentalNeumes.slice(12, 16));
+export const secondaryAccidentalNeumes = allAccidentalNeumes
+  .slice(4, 8)
+  .concat(allAccidentalNeumes.slice(16, 20));
+export const tertiaryAccidentalNeumes = allAccidentalNeumes
+  .slice(8, 12)
+  .concat(allAccidentalNeumes.slice(20, 24));
 export const allMeasureBars = Object.values(MeasureBar);
 //const allFthoras = Object.values(Fthora);
 //const allIsons = Object.values(Ison);
@@ -48,7 +54,12 @@ export interface GorgonIndexSetting {
   includeSlow: boolean;
 }
 
-export enum KlasmaType { KLASMA_TOP, KLASMA_BOTTOM, KLASMA_BOTH, NO_KLASMA }
+export enum KlasmaType {
+  KLASMA_TOP,
+  KLASMA_BOTTOM,
+  KLASMA_BOTH,
+  NO_KLASMA,
+}
 
 export interface TimeIndexSettings {
   klasmaType: KlasmaType;
@@ -124,7 +135,9 @@ export function includesPetasti(quantitativeNeume: QuantitativeNeume): boolean {
 
 // klasma related functions
 
-export function isBottomKlasmaOnlyNeume(quantitativeNeume: QuantitativeNeume): boolean {
+export function isBottomKlasmaOnlyNeume(
+  quantitativeNeume: QuantitativeNeume,
+): boolean {
   switch (quantitativeNeume) {
     case QuantitativeNeume.PetastiWithIson:
     case QuantitativeNeume.Petasti:
@@ -144,7 +157,9 @@ export function isBottomKlasmaOnlyNeume(quantitativeNeume: QuantitativeNeume): b
   return false;
 }
 
-export function isTopKlasmaOnlyNeume(quantitativeNeume: QuantitativeNeume): boolean {
+export function isTopKlasmaOnlyNeume(
+  quantitativeNeume: QuantitativeNeume,
+): boolean {
   switch (quantitativeNeume) {
     case QuantitativeNeume.Ison:
     case QuantitativeNeume.KentemataPlusOligon:
@@ -165,8 +180,9 @@ export function isTopKlasmaOnlyNeume(quantitativeNeume: QuantitativeNeume): bool
   return false;
 }
 
-export function isKlasmaDisabledNeume(quantitativeNeume: QuantitativeNeume): boolean {
-
+export function isKlasmaDisabledNeume(
+  quantitativeNeume: QuantitativeNeume,
+): boolean {
   switch (quantitativeNeume) {
     case QuantitativeNeume.Hyporoe:
     case QuantitativeNeume.Kentemata:
@@ -181,7 +197,9 @@ export function isKlasmaDisabledNeume(quantitativeNeume: QuantitativeNeume): boo
   return false;
 }
 
-export function getKlasmaType(quantitativeNeume: QuantitativeNeume): KlasmaType {
+export function getKlasmaType(
+  quantitativeNeume: QuantitativeNeume,
+): KlasmaType {
   if (isKlasmaDisabledNeume(quantitativeNeume)) {
     return KlasmaType.NO_KLASMA;
   }

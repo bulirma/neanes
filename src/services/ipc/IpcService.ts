@@ -1,4 +1,5 @@
 import {
+  BatchConfigReplyArgs,
   ExportPageAsImageArgs,
   ExportWorkspaceAsHtmlArgs,
   ExportWorkspaceAsImageArgs,
@@ -24,6 +25,10 @@ import { SaveService } from '../SaveService';
 import { IIpcService } from './IIpcService';
 
 export class IpcService implements IIpcService {
+  public async getBatchConfig(): Promise<BatchConfigReplyArgs> {
+    return await window.ipcRenderer.invoke(IpcRendererChannels.GetBatchConfig);
+  }
+
   public async saveWorkspace(
     workspace: Workspace,
   ): Promise<SaveWorkspaceReplyArgs> {
