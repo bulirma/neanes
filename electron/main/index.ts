@@ -106,21 +106,21 @@ let quitting = false;
 const minWidth = 800;
 const minHeight = 600;
 
-function getBatchConfigPath() {
-  for (let i = 0; i < process.argv.length; ++i) {
-    const arg = process.argv[i];
-    console.log(arg);
-    if (arg === '--batch-config') {
-      if (i === process.argv.length - 1) {
-        throw new Error('missing argument for batch config path option');
-      }
-      return process.argv[i + 1];
-    }
-  }
-  return undefined;
-}
+//function getBatchConfigPath() {
+//  for (let i = 0; i < process.argv.length; ++i) {
+//    const arg = process.argv[i];
+//    console.log(arg);
+//    if (arg === '--batch-config') {
+//      if (i === process.argv.length - 1) {
+//        throw new Error('missing argument for batch config path option');
+//      }
+//      return process.argv[i + 1];
+//    }
+//  }
+//  return undefined;
+//}
 
-const batchConfigPath = getBatchConfigPath();
+//const batchConfigPath = getBatchConfigPath();
 
 interface WindowState {
   width: number;
@@ -1800,12 +1800,12 @@ ipcMain.on(
 );
 
 ipcMain.handle(IpcRendererChannels.GetBatchConfig, async () => {
-  if (batchConfigPath === undefined) {
-    console.log('No batch config file specified, using default config');
-    return {};
-  }
+  //if (batchConfigPath === undefined) {
+  //  console.log('No batch config file specified, using default config');
+  //  return {};
+  //}
   try {
-    const data = await fs.readFile(batchConfigPath, 'utf-8');
+    const data = await fs.readFile('batch-config.json', 'utf-8');
     return JSON.parse(data);
   } catch {
     console.error('Error loading a batch config file (check if file exists or whether it is valid); using default config');

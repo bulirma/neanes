@@ -19,20 +19,22 @@ export class QuantitativeNeumeGenerator {
   ) {
     let designatedProb = 0;
     let undefCount = 0;
-    Object.values(quantitativeNeumeDistribution).forEach((value) => {
+    for (const key of quantitativeNeumeValues) {
+      const value = quantitativeNeumeDistribution[key];
+      console.log(value);
       if (value === undefined) {
         ++undefCount;
       } else {
         designatedProb += value;
       }
-    });
+    }
     if (designatedProb > 1 + Number.EPSILON) {
       throw new Error('not a distribution');
     }
     const dist = {};
     //this.distributionFunction = new Map<number, QuantitativeNeume>();
     let cumulativeProb = 0;
-    const uniformResidualProb = (1 - designatedProb) / undefCount;
+    const uniformResidualProb = undefCount === 0 ? 0 : (1 - designatedProb) / undefCount;
     for (const key of quantitativeNeumeValues) {
       const prob = quantitativeNeumeDistribution[key];
       if (prob === undefined) {
@@ -50,6 +52,8 @@ export class QuantitativeNeumeGenerator {
 
   next(): QuantitativeNeume {
     const random = Math.random();
+    //console.log(random);
+    //console.log(this.distribution);
     for (const key of quantitativeNeumeValues) {
       if (random < this.distribution[key]) {
         return key;

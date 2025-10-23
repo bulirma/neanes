@@ -2599,7 +2599,7 @@ export default class Editor extends Vue {
 
     this.ipcService.getBatchConfig()
       .then(config => {
-        console.log(config);
+        this.randomNeumeGenerator.initialize(config);
       });
   }
 

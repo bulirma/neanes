@@ -9,6 +9,8 @@ import {
   TimeNeume,
   VocalExpressionNeume,
 } from '@/models/Neumes';
+import { BatchConfig, NeumeUseFlags } from '@/models/random-distribution/Config';
+import { QuantitativeNeumeGenerator, QuantitativeNeumePartialDistribution } from '@/models/random-distribution/QuantitativeNeumes';
 import {
   allMeasureBars,
   allQuantitativeNeumes,
@@ -33,7 +35,22 @@ import {
   TimeIndexSettings,
 } from '@/utils/NeumeCompositionHelper';
 
-export class UniformRandomNeumeGenerator {
+export class RandomNeumeGenerator {
+  useFlags?: NeumeUseFlags;
+  quantitativeNuemeGenerator?: QuantitativeNeumeGenerator;
+
+  initialize(batchConfig: BatchConfig) {
+    this.useFlags = batchConfig.NeumeUseFlags ?? {
+      GorgonNeume: true,
+      TimeNeume: true,
+      VocalExpressionNeume: true,
+      AccidentalNeume: true,
+      MeasureBarNeume: true,
+    };
+    const quantitativeNeumeDist = batchConfig.QuantitativeNeume ?? {} as QuantitativeNeumePartialDistribution;
+    this.quantitativeNuemeGenerator = new QuantitativeNeumeGenerator(quantitativeNeumeDist);
+  }
+ 
   randomQuantitativeNeumeIndex(): number {
     return Math.floor(Math.random() * allQuantitativeNeumes.length);
   }
@@ -242,34 +259,47 @@ export class UniformRandomNeumeGenerator {
     return randomIndex < 0 ? null : allMeasureBars[randomIndex];
   }
 
+  //next(): ScoreElement {
+  //  const score = new NoteElement();
+  //  const quantitativeNeume = this.genQuantitativeNeume();
+  //  const vocalExpressionNeume =
+  //    this.genVocalExpressionNeume(quantitativeNeume);
+  //  const gorgonNeume = this.genPrimaryGorgonNeume(
+  //    quantitativeNeume,
+  //    vocalExpressionNeume,
+  //  );
+  //  const secondaryGorgonNeume = this.genSecondaryGorgonNeume(
+  //    quantitativeNeume,
+  //    vocalExpressionNeume,
+  //  );
+  //  const timeNeume = this.genTimeNeume(quantitativeNeume);
+  //  const accidentalNeume = this.genPrimaryAccidentalNeume(quantitativeNeume);
+  //  const secondaryAccidentalNeume =
+  //    this.genSecondaryAccidentalNeume(quantitativeNeume);
+  //  const tertiaryAccidentalNeume =
+  //    this.genTertiaryAccidentalNeume(quantitativeNeume);
+  //  const attrs = {
+  //    quantitativeNeume: quantitativeNeume,
+  //    gorgonNeume: gorgonNeume,
+  //    secondaryGorgonNeume: secondaryGorgonNeume,
+  //    timeNeume: timeNeume,
+  //    vocalExpressionNeume: vocalExpressionNeume,
+  //    accidental: accidentalNeume,
+  //    secondaryAccidental: secondaryAccidentalNeume,
+  //    tertiaryAccidental: tertiaryAccidentalNeume,
+  //  };
+  //  Object.assign(score, attrs);
+  //  return score;
+  //}
+
   next(): ScoreElement {
+    if (this.useFlags === undefined) {
+      throw new Error('Random neume generator was not initialized');
+    }
     const score = new NoteElement();
-    const quantitativeNeume = this.genQuantitativeNeume();
-    const vocalExpressionNeume =
-      this.genVocalExpressionNeume(quantitativeNeume);
-    const gorgonNeume = this.genPrimaryGorgonNeume(
-      quantitativeNeume,
-      vocalExpressionNeume,
-    );
-    const secondaryGorgonNeume = this.genSecondaryGorgonNeume(
-      quantitativeNeume,
-      vocalExpressionNeume,
-    );
-    const timeNeume = this.genTimeNeume(quantitativeNeume);
-    const accidentalNeume = this.genPrimaryAccidentalNeume(quantitativeNeume);
-    const secondaryAccidentalNeume =
-      this.genSecondaryAccidentalNeume(quantitativeNeume);
-    const tertiaryAccidentalNeume =
-      this.genTertiaryAccidentalNeume(quantitativeNeume);
+    const quantitativeNeume = this.quantitativeNuemeGenerator!.next();
     const attrs = {
-      quantitativeNeume: quantitativeNeume,
-      gorgonNeume: gorgonNeume,
-      secondaryGorgonNeume: secondaryGorgonNeume,
-      timeNeume: timeNeume,
-      vocalExpressionNeume: vocalExpressionNeume,
-      accidental: accidentalNeume,
-      secondaryAccidental: secondaryAccidentalNeume,
-      tertiaryAccidental: tertiaryAccidentalNeume,
+      quantitativeNeume: quantitativeNeume
     };
     Object.assign(score, attrs);
     return score;
