@@ -2597,10 +2597,9 @@ export default class Editor extends Vue {
     // hack to access this component globally
     (window as any).editorInstance = this;
 
-    this.ipcService.getBatchConfig()
-      .then(config => {
-        this.randomNeumeGenerator.initialize(config);
-      });
+    this.ipcService.getBatchConfig().then((config) => {
+      this.randomNeumeGenerator.initialize(config);
+    });
   }
 
   beforeUnmount() {
@@ -2745,8 +2744,9 @@ export default class Editor extends Vue {
     // first there is need to select the last element, but do not do that after inserting
     this.nameWorkspaceWithTimestamp();
     this.selectedElement = this.elements[this.elements.length - 1];
-    for (let i = 0; i < 145; ++i) {
+    for (let i = 0; i < 30; ++i) {
       const element = this.randomNeumeGenerator.next();
+      console.log(element);
       //element.lyricsColor = this.score.pageSetup.lyricsDefaultColor;
       //element.lyricsFontFamily = this.score.pageSetup.lyricsDefaultFontFamily;
       //element.lyricsFontSize = this.score.pageSetup.lyricsDefaultFontSize;
@@ -2759,12 +2759,12 @@ export default class Editor extends Vue {
       //await ((ms) => new Promise(resolve => setTimeout(resolve, ms)))(100);
     }
 
-    const settings = {
-      dpi: 300,
-      openFolder: false,
-      transparentBackground: false
-    } as ExportAsPngSettings;
-    await this.exportAsNamedPng(settings);
+    //const settings = {
+    //  dpi: 300,
+    //  openFolder: false,
+    //  transparentBackground: false,
+    //} as ExportAsPngSettings;
+    //await this.exportAsNamedPng(settings);
 
     //const workspace = this.selectedWorkspace;
     //this.onFileMenuNewScore();
@@ -7131,7 +7131,7 @@ export default class Editor extends Vue {
           if (data != null) {
             console.log(Date.now());
             data = data.replace(/^data:image\/png;base64,/, '');
-            await this.ipcService.exportPageAsImage(filePath, data)
+            await this.ipcService.exportPageAsImage(filePath, data);
           }
         }
       } catch (error) {

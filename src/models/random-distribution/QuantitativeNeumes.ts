@@ -1,64 +1,44 @@
 import { QuantitativeNeume } from '@/models/Neumes';
+import {
+  Distribution,
+  PartialDistribution,
+} from '@/models/random-distribution/Config';
+import { NeumeGenerator } from '@/models/random-distribution/NeumeRandomGenerator';
 
-const quantitativeNeumeValues = Object.values(QuantitativeNeume);
+const quantitativeNeumes = Object.values(QuantitativeNeume);
 
 export type QuantitativeNeumePartialDistribution = {
-  [prop in (typeof quantitativeNeumeValues)[number]]?: number;
-};
+  [prop in (typeof quantitativeNeumes)[number]]?: number;
+} & PartialDistribution;
 
-export type QuantitativeNeumeCumulativeDistribution = {
-  [prop in (typeof quantitativeNeumeValues)[number]]: number;
-};
+export type QuantitativeNeumeDistribution = {
+  [prop in (typeof quantitativeNeumes)[number]]: number;
+} & Distribution;
 
-export class QuantitativeNeumeGenerator {
-  distribution: QuantitativeNeumeCumulativeDistribution;
-  //distributionFunction: Map<number, QuantitativeNeume>;
+export interface QuantitativeNeumeGeneratorArgs {
+  neumes: QuantitativeNeume[];
+  neumeDistribution: QuantitativeNeumePartialDistribution;
+}
 
-  constructor(
-    quantitativeNeumeDistribution: QuantitativeNeumePartialDistribution,
-  ) {
-    let designatedProb = 0;
-    let undefCount = 0;
-    for (const key of quantitativeNeumeValues) {
-      const value = quantitativeNeumeDistribution[key];
-      console.log(value);
-      if (value === undefined) {
-        ++undefCount;
-      } else {
-        designatedProb += value;
-      }
-    }
-    if (designatedProb > 1 + Number.EPSILON) {
-      throw new Error('not a distribution');
-    }
-    const dist = {};
-    //this.distributionFunction = new Map<number, QuantitativeNeume>();
-    let cumulativeProb = 0;
-    const uniformResidualProb = undefCount === 0 ? 0 : (1 - designatedProb) / undefCount;
-    for (const key of quantitativeNeumeValues) {
-      const prob = quantitativeNeumeDistribution[key];
-      if (prob === undefined) {
-        cumulativeProb += uniformResidualProb;
-      } else {
-        cumulativeProb += prob;
-      }
-      Object.assign(dist, {
-        [key]: cumulativeProb,
-      });
-      //this.distributionFunction.set(cumulativeProb, key);
-    }
-    this.distribution = dist as QuantitativeNeumeCumulativeDistribution;
+export class QuantitativeNeumeGenerator extends NeumeGenerator<QuantitativeNeumeDistribution> {
+  cumulativeDistribution: QuantitativeNeumeDistribution;
+
+  constructor(neumeDistribution: QuantitativeNeumePartialDistribution) {
+    const args = {
+      neumes: quantitativeNeumes,
+      neumeDistribution: neumeDistribution,
+    } as QuantitativeNeumeGeneratorArgs;
+    super(args);
+    this.cumulativeDistribution = this.genCumulativeDistribution(args);
   }
 
   next(): QuantitativeNeume {
-    const random = Math.random();
-    //console.log(random);
-    //console.log(this.distribution);
-    for (const key of quantitativeNeumeValues) {
-      if (random < this.distribution[key]) {
+    const random = Math.random() * this.cumulativeDistribution.Denominator;
+    for (const key of quantitativeNeumes) {
+      if (random < this.cumulativeDistribution[key]) {
         return key;
       }
     }
-    return quantitativeNeumeValues[quantitativeNeumeValues.length - 1];
+    return quantitativeNeumes[quantitativeNeumes.length - 1];
   }
 }

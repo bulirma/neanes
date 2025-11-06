@@ -1,262 +1,64 @@
 import { NoteElement, ScoreElement } from '@/models/Element';
-import { getSecondaryNeume } from '@/models/NeumeReplacements';
+import { PrimaryAccidentalNeumeGenerator, PrimaryAccidentalNeumePartialDistribution, SecondaryAccidentalNeumeGenerator, TertiaryAccidentalNeumeGenerator } from '@/models/random-distribution/AccidentalNeumes';
 import {
-  Accidental,
-  GorgonNeume,
-  MeasureBar,
-  QuantitativeNeume,
-  restNeumes,
-  TimeNeume,
-  VocalExpressionNeume,
-} from '@/models/Neumes';
-import { BatchConfig, NeumeUseFlags } from '@/models/random-distribution/Config';
-import { QuantitativeNeumeGenerator, QuantitativeNeumePartialDistribution } from '@/models/random-distribution/QuantitativeNeumes';
+  BatchConfig,
+  NeumeTypeDistribution,
+} from '@/models/random-distribution/Config';
+import { PrimaryGorgonNeumeGenerator, SecondaryGorgonNeumeGenerator, SecondaryGorgonNeumePartialDistribution } from '@/models/random-distribution/GorgonNeumes';
 import {
-  allMeasureBars,
-  allQuantitativeNeumes,
-  allTimeNeumes,
-  allVocalExpressionNeumes,
-  getKlasmaType,
-  GorgonIndexSetting,
-  hapleNeumes,
-  includesHyporoe,
-  includesPetasti,
-  isCompoundNeume,
-  isHapleDisabled,
-  isKoronisDisabled,
-  KlasmaType,
-  primaryAccidentalNeumes,
-  //includesHyporoe,
-  primaryGorgonNeumes,
-  secondaryAccidentalNeumes,
-  secondaryGorgonNeumes,
-  slowGorgonNeumes,
-  tertiaryAccidentalNeumes,
-  TimeIndexSettings,
-} from '@/utils/NeumeCompositionHelper';
+  QuantitativeNeumeGenerator,
+  QuantitativeNeumePartialDistribution,
+} from '@/models/random-distribution/QuantitativeNeumes';
+import { TimeNeumeGenerator, TimeNeumePartialDistribution } from '@/models/random-distribution/TimeNeumes';
+import { VocalExpressionNeumePartialDistribution, VocalExpresssionNeumeGenerator } from '@/models/random-distribution/VocalExpressionNeumes';
 
 export class RandomNeumeGenerator {
-  useFlags?: NeumeUseFlags;
+  neumeTypeDistribution?: NeumeTypeDistribution;
   quantitativeNuemeGenerator?: QuantitativeNeumeGenerator;
+  vocalExpressionNeumeGenerator?: VocalExpresssionNeumeGenerator;
+  primaryGorgonNeumeGenerator?: PrimaryGorgonNeumeGenerator;
+  secondaryGorgonNeumeGenerator?: SecondaryGorgonNeumeGenerator;
+  timeNeumeGenerator?: TimeNeumeGenerator;
+  primaryAccidentalNeumeGenerator?: PrimaryAccidentalNeumeGenerator;
+  secondaryAccidentalNeumeGenerator?: SecondaryAccidentalNeumeGenerator;
+  tertiaryAccidentalNeumeGenerator?: TertiaryAccidentalNeumeGenerator;
 
   initialize(batchConfig: BatchConfig) {
-    this.useFlags = batchConfig.NeumeUseFlags ?? {
-      GorgonNeume: true,
-      TimeNeume: true,
-      VocalExpressionNeume: true,
-      AccidentalNeume: true,
-      MeasureBarNeume: true,
+    this.neumeTypeDistribution = batchConfig.NeumeTypeDistribution ?? {
+      PrimaryGorgonNeume: 1,
+      SecondaryGorgonNeume: 1,
+      TimeNeume: 1,
+      VocalExpressionNeume: 1,
+      PrimaryAccidentalNeume: 1,
+      SecondaryAccidentalNeume: 1,
+      TertiaryAccidentalNeume: 1,
     };
-    const quantitativeNeumeDist = batchConfig.QuantitativeNeume ?? {} as QuantitativeNeumePartialDistribution;
+
+    const quantitativeNeumeDist = batchConfig.QuantitativeNeumeDistribution ??
+      ({} as QuantitativeNeumePartialDistribution);
+    const vocalExpressionNeumeDist = batchConfig.VocalExpressionNeumeDistribution ??
+      ({} as VocalExpressionNeumePartialDistribution);
+    const primaryGorgonNeumeDist = batchConfig.PrimaryGorgonNeumeDistribution ??
+      ({} as PrimaryAccidentalNeumePartialDistribution);
+    const secondaryGorgonNeumeDist = batchConfig.SecondaryGorgonNeumeDistribution ??
+      ({} as SecondaryGorgonNeumePartialDistribution);
+    const timeNeumeDist = batchConfig.TimeNeumeDistribution ??
+      ({} as TimeNeumePartialDistribution);
+    const primaryAccidentalNeumeDist = batchConfig.PrimaryGorgonNeumeDistribution ??
+      ({} as PrimaryAccidentalNeumePartialDistribution);
+    const secondaryAccidentalNeumeDist = batchConfig.SecondaryGorgonNeumeDistribution ??
+      ({} as SecondaryGorgonNeumePartialDistribution);
+    const tertiaryAccidentalNeumeDist = batchConfig.TertiaryAccidentalNeumeDistribution ??
+      ({} as SecondaryGorgonNeumePartialDistribution);
+
     this.quantitativeNuemeGenerator = new QuantitativeNeumeGenerator(quantitativeNeumeDist);
-  }
- 
-  randomQuantitativeNeumeIndex(): number {
-    return Math.floor(Math.random() * allQuantitativeNeumes.length);
-  }
-
-  randomPrimaryGorgonNeumeIndex(gorgonSetting: GorgonIndexSetting): number {
-    let range = primaryGorgonNeumes.length;
-    if (!gorgonSetting.omitBottom) {
-      ++range;
-    }
-    if (gorgonSetting.includeSlow) {
-      range += 3;
-    }
-    const idx = Math.floor(Math.random() * range);
-    if (gorgonSetting.omitBottom) {
-      if (range >= primaryGorgonNeumes.length) {
-        return range - primaryGorgonNeumes.length;
-      }
-      return idx < 2 ? idx - 1 : idx;
-    }
-    if (range > primaryGorgonNeumes.length) {
-      return range - primaryGorgonNeumes.length - 1;
-    }
-    return idx - 1;
-  }
-
-  randomSecondaryGorgonNeumeIndex(): number {
-    return Math.floor(Math.random() * (secondaryGorgonNeumes.length + 1)) - 1;
-  }
-
-  randomTimeNeumeIndex(timeSettings: TimeIndexSettings): number {
-    let range = allTimeNeumes.length + 1;
-    if (timeSettings.hapleDisabled) {
-      range -= 4;
-    }
-    if (timeSettings.koronisDisabled) {
-      --range;
-    }
-    switch (timeSettings.klasmaType) {
-      case KlasmaType.KLASMA_TOP:
-      case KlasmaType.KLASMA_BOTTOM:
-        --range;
-        break;
-      case KlasmaType.NO_KLASMA:
-        range -= 2;
-    }
-    return Math.floor(Math.random() * range) - 1;
-  }
-
-  randomVocalExpressionNeumeIndex(): number {
-    return (
-      Math.floor(Math.random() * (allVocalExpressionNeumes.length + 1)) - 1
-    );
-  }
-
-  randomPrimaryAccidentalNeumeIndex(): number {
-    return Math.floor(Math.random() * (primaryAccidentalNeumes.length + 1)) - 1;
-  }
-
-  randomSecondaryAccidentalNeumeIndex(): number {
-    return (
-      Math.floor(Math.random() * (secondaryAccidentalNeumes.length + 1)) - 1
-    );
-  }
-
-  randomTertiaryAccidentalNeumeIndex(): number {
-    return (
-      Math.floor(Math.random() * (tertiaryAccidentalNeumes.length + 1)) - 1
-    );
-  }
-
-  randomMeasureBarNeumeIndex(): number {
-    return Math.floor(Math.random() * (allMeasureBars.length + 1)) - 1;
-  }
-
-  genQuantitativeNeume(): QuantitativeNeume {
-    return allQuantitativeNeumes[this.randomQuantitativeNeumeIndex()];
-  }
-
-  genPrimaryGorgonNeume(
-    quantitativeNeume: QuantitativeNeume,
-    vocanExpressionNeume: VocalExpressionNeume | null,
-  ): GorgonNeume | null {
-    if (includesPetasti(quantitativeNeume)) {
-      return null;
-    }
-    if (
-      vocanExpressionNeume === VocalExpressionNeume.Psifiston &&
-      quantitativeNeume !== QuantitativeNeume.KentemataPlusOligon
-    ) {
-      return null;
-    }
-    const includeSlow =
-      quantitativeNeume === QuantitativeNeume.KentemataPlusOligon;
-    const gorgonSettings: GorgonIndexSetting = {
-      omitBottom: false,
-      includeSlow: includeSlow,
-    };
-    if (
-      isCompoundNeume(quantitativeNeume) ||
-      includesHyporoe(quantitativeNeume)
-    ) {
-      gorgonSettings.omitBottom = true;
-    }
-    const randomIndex = this.randomPrimaryGorgonNeumeIndex(gorgonSettings);
-    if (includeSlow) {
-      return slowGorgonNeumes[randomIndex];
-    }
-    return randomIndex < 0 ? null : primaryGorgonNeumes[randomIndex];
-  }
-
-  genSecondaryGorgonNeume(
-    quantitativeNeume: QuantitativeNeume,
-    vocanExpressionNeume: VocalExpressionNeume | null,
-  ): GorgonNeume | null {
-    if (includesPetasti(quantitativeNeume)) {
-      return null;
-    }
-    if (
-      vocanExpressionNeume === VocalExpressionNeume.Psifiston &&
-      quantitativeNeume !== QuantitativeNeume.KentemataPlusOligon
-    ) {
-      return null;
-    }
-    if (getSecondaryNeume(quantitativeNeume) === null) {
-      return null;
-    }
-    const randomIndex = this.randomSecondaryGorgonNeumeIndex();
-    return randomIndex < 0 ? null : secondaryGorgonNeumes[randomIndex];
-  }
-
-  genTimeNeume(quantitativeNeume: QuantitativeNeume): TimeNeume | null {
-    // TODO: also disable for rest neumes
-    const timeSettings: TimeIndexSettings = {
-      klasmaType: getKlasmaType(quantitativeNeume),
-      hapleDisabled: isHapleDisabled(quantitativeNeume),
-      koronisDisabled: isKoronisDisabled(quantitativeNeume),
-    };
-    const randomIndex = this.randomTimeNeumeIndex(timeSettings);
-    if (randomIndex < 0) {
-      return null;
-    }
-    let enabledNeumes = [];
-    if (
-      timeSettings.klasmaType === KlasmaType.KLASMA_BOTH ||
-      timeSettings.klasmaType === KlasmaType.KLASMA_TOP
-    ) {
-      enabledNeumes.push(TimeNeume.Klasma_Top);
-    }
-    if (
-      timeSettings.klasmaType === KlasmaType.KLASMA_BOTH ||
-      timeSettings.klasmaType === KlasmaType.KLASMA_BOTTOM
-    ) {
-      enabledNeumes.push(TimeNeume.Klasma_Bottom);
-    }
-    if (!timeSettings.hapleDisabled) {
-      enabledNeumes = enabledNeumes.concat(hapleNeumes);
-    }
-    if (!timeSettings.koronisDisabled) {
-      enabledNeumes.push(TimeNeume.Koronis);
-    }
-    return enabledNeumes[randomIndex];
-  }
-
-  genVocalExpressionNeume(
-    quantitativeNeume: QuantitativeNeume,
-  ): VocalExpressionNeume | null {
-    if (restNeumes.includes(quantitativeNeume)) {
-      return null;
-    }
-    const randomIndex = this.randomVocalExpressionNeumeIndex();
-    return randomIndex < 0 ? null : allVocalExpressionNeumes[randomIndex];
-  }
-
-  genPrimaryAccidentalNeume(
-    quantitativeNeume: QuantitativeNeume,
-  ): Accidental | null {
-    if (restNeumes.includes(quantitativeNeume)) {
-      return null;
-    }
-    const randomIndex = this.randomPrimaryAccidentalNeumeIndex();
-    return randomIndex < 0 ? null : primaryAccidentalNeumes[randomIndex];
-  }
-
-  genSecondaryAccidentalNeume(
-    quantitativeNeume: QuantitativeNeume,
-  ): Accidental | null {
-    if (restNeumes.includes(quantitativeNeume)) {
-      return null;
-    }
-    const randomIndex = this.randomSecondaryAccidentalNeumeIndex();
-    return randomIndex < 0 ? null : secondaryAccidentalNeumes[randomIndex];
-  }
-
-  genTertiaryAccidentalNeume(
-    quantitativeNeume: QuantitativeNeume,
-  ): Accidental | null {
-    if (restNeumes.includes(quantitativeNeume)) {
-      return null;
-    }
-    const randomIndex = this.randomTertiaryAccidentalNeumeIndex();
-    return randomIndex < 0 ? null : tertiaryAccidentalNeumes[randomIndex];
-  }
-
-  genMeasureBarNeume(): MeasureBar | null {
-    const randomIndex = this.randomMeasureBarNeumeIndex();
-    return randomIndex < 0 ? null : allMeasureBars[randomIndex];
+    this.vocalExpressionNeumeGenerator = new VocalExpresssionNeumeGenerator(vocalExpressionNeumeDist);
+    this.primaryGorgonNeumeGenerator = new PrimaryGorgonNeumeGenerator(primaryGorgonNeumeDist);
+    this.secondaryGorgonNeumeGenerator = new SecondaryGorgonNeumeGenerator(secondaryGorgonNeumeDist);
+    this.timeNeumeGenerator = new TimeNeumeGenerator(timeNeumeDist);
+    this.primaryAccidentalNeumeGenerator = new PrimaryAccidentalNeumeGenerator(primaryAccidentalNeumeDist);
+    this.secondaryAccidentalNeumeGenerator = new SecondaryAccidentalNeumeGenerator(secondaryAccidentalNeumeDist);
+    this.tertiaryAccidentalNeumeGenerator = new TertiaryAccidentalNeumeGenerator(tertiaryAccidentalNeumeDist);
   }
 
   //next(): ScoreElement {
@@ -293,25 +95,38 @@ export class RandomNeumeGenerator {
   //}
 
   next(): ScoreElement {
-    if (this.useFlags === undefined) {
+    if (this.neumeTypeDistribution === undefined) {
       throw new Error('Random neume generator was not initialized');
     }
     const score = new NoteElement();
     const quantitativeNeume = this.quantitativeNuemeGenerator!.next();
-    const attrs = {
-      quantitativeNeume: quantitativeNeume
-    };
-    Object.assign(score, attrs);
-    return score;
-  }
+    const vocalExpressionNeume = this.vocalExpressionNeumeGenerator!.isNextValid(quantitativeNeume) ?
+      this.vocalExpressionNeumeGenerator!.next() : null;
+    const primaryGorgonNeume = this.primaryGorgonNeumeGenerator!.isNextValid(quantitativeNeume, vocalExpressionNeume) ?
+      this.primaryGorgonNeumeGenerator!.next(quantitativeNeume) : null;
+    const secondaryGorgonNeume = this.secondaryGorgonNeumeGenerator!.isNextValid(quantitativeNeume, vocalExpressionNeume) ?
+      this.secondaryGorgonNeumeGenerator!.next() : null;
+    const timeNeume = this.timeNeumeGenerator!.isNextValid(quantitativeNeume) ?
+      this.timeNeumeGenerator!.next(quantitativeNeume) : null;
+    const primaryAccidentalNeume = this.primaryAccidentalNeumeGenerator!.isNextValid(quantitativeNeume) ?
+      this.primaryAccidentalNeumeGenerator!.next() : null;
+    const secondaryAccidentalNeume = this.secondaryAccidentalNeumeGenerator!.isNextValid(quantitativeNeume) ?
+      this.secondaryAccidentalNeumeGenerator!.next() : null;
+    const tertiaryAccidentalNeume = this.tertiaryAccidentalNeumeGenerator!.isNextValid(quantitativeNeume) ?
+      this.tertiaryAccidentalNeumeGenerator!.next() : null;
 
-  test(): ScoreElement {
-    const score = new NoteElement();
     const attrs = {
-      quantitativeNeume: null,
-      gorgonNeume: GorgonNeume.Gorgon_Top,
+      quantitativeNeume: quantitativeNeume,
+      vocalExpressionNeume: vocalExpressionNeume,
+      gorgonNeume: primaryGorgonNeume,
+      secondaryGorgonNeume: secondaryGorgonNeume,
+      timeNeume: timeNeume,
+      accidental: primaryAccidentalNeume,
+      secondaryAccidental: secondaryAccidentalNeume,
+      tertiaryAccidental: tertiaryAccidentalNeume,
     };
     Object.assign(score, attrs);
+
     return score;
   }
 }
