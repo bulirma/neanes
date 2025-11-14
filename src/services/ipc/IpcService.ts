@@ -14,6 +14,7 @@ import {
   SaveWorkspaceAsArgs,
   SaveWorkspaceAsReplyArgs,
   SaveWorkspaceReplyArgs,
+  SetupBatchDirectoryReplyArgs,
   ShowMessageBoxArgs,
   ShowMessageBoxReplyArgs,
 } from '@/ipc/ipcChannels';
@@ -27,6 +28,10 @@ import { IIpcService } from './IIpcService';
 export class IpcService implements IIpcService {
   public async getBatchConfig(): Promise<BatchConfigReplyArgs> {
     return await window.ipcRenderer.invoke(IpcRendererChannels.GetBatchConfig);
+  }
+
+  public async setupBatchDirectory(): Promise<SetupBatchDirectoryReplyArgs> {
+    return await window.ipcRenderer.invoke(IpcRendererChannels.SetupBatchDirectory);
   }
 
   public async saveWorkspace(

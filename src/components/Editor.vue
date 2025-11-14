@@ -32,6 +32,7 @@
       @click="selectedLyrics = null"
       @play-audio="playAudio"
       @open-playback-settings="openPlaybackSettingsDialog"
+      @generate-page-images="generatePageImages"
     />
     <div class="content">
       <div class="left-panel">
@@ -1363,6 +1364,7 @@
 <script lang="ts">
 import 'vue3-tabs-chrome/dist/vue3-tabs-chrome.css';
 
+import { Mutex } from 'async-mutex';
 import { getFontEmbedCSS, toPng } from 'html-to-image';
 import { debounce, throttle } from 'throttle-debounce';
 import { nextTick, StyleValue, toRaw } from 'vue';
@@ -1496,6 +1498,11 @@ import { NeumeKeyboard } from '@/services/NeumeKeyboard';
 import { IPlatformService } from '@/services/platform/IPlatformService';
 // random generater service
 import { UniformRandomNeumeGenerator } from '@/services/RandomNeumeGenerator';
+import {
+  //ExportPageAsPngArgs,
+  ExportPageAsPngSettings,
+  SaveGeneratedDataService,
+} from '@/services/SaveGeneratedDataService';
 import { SaveService } from '@/services/SaveService';
 import { TextMeasurementService } from '@/services/TextMeasurementService';
 import { TextSearchService } from '@/services/TextSearchService';
@@ -1567,6 +1574,7 @@ export default class Editor extends Vue {
 
   // injection of random neume generator
   @Inject() readonly randomNeumeGenerator!: UniformRandomNeumeGenerator;
+  @Inject() readonly saveGeneratedDataService!: SaveGeneratedDataService;
 
   searchTextQuery: string = '';
   searchTextPanelIsOpen = false;
@@ -2596,10 +2604,6 @@ export default class Editor extends Vue {
 
     // hack to access this component globally
     (window as any).editorInstance = this;
-
-    this.ipcService.getBatchConfig().then((config) => {
-      this.randomNeumeGenerator.initialize(config);
-    });
   }
 
   beforeUnmount() {
@@ -2725,28 +2729,114 @@ export default class Editor extends Vue {
     this.audioService.dispose();
   }
 
-  nameWorkspaceWithTimestamp(compress: boolean = false) {
-    const currentTime = new Date();
+  generationPageNumber: number = -1;
+  toGeneratePages: number = -1;
+  generationMutex: Mutex = new Mutex();
+
+  nameWorkspaceWithUUID(compress: boolean = false) {
     const extension = compress ? '.byz' : '.byzx';
-    this.selectedWorkspace.filePath = currentTime.toISOString() + extension;
+    this.selectedWorkspace.filePath = this.selectedWorkspace.id + extension;
   }
 
-  async saveNamedWorkspace() {
-    const result = await this.saveWorkspaceAs(workspace);
-    if (result.success) {
-      this.selectedWorkspace.filePath = result.filePath;
-      this.selectedWorkspace.hasUnsavedChanges = false;
+  //async saveNamedWorkspace() {
+  //  const result = await this.saveWorkspaceAs(workspace);
+  //  if (result.success) {
+  //    this.selectedWorkspace.filePath = result.filePath;
+  //    this.selectedWorkspace.hasUnsavedChanges = false;
+  //  }
+  //}
+
+  async saveGeneratedWorkspace(workspace: Workspace) {
+    if (!this.lyricsLocked) {
+      this.lyrics = this.lyricService.extractLyrics(
+        this.elements,
+        this.score.pageSetup.disableGreekMelismata,
+      );
     }
+
+    const result = await this.saveGeneratedDataService.saveWorkspace(workspace);
+    workspace.hasUnsavedChanges = false;
+    return result;
+  }
+
+  async exportPageAsPngCall(settings: ExportPageAsPngSettings | undefined) {
+    const filePath = this.selectedWorkspace.filePath + '.png';
+    if (settings === undefined) {
+      settings = {
+        dpi: 300,
+        transparentBackground: false,
+      } as ExportPageAsPngSettings;
+    }
+
+    this.printMode = true;
+    this.exportInProgress = true;
+
+    // Blur the active element so that focus outlines and
+    // blinking cursors don't show up in the printed page
+    const activeElement = this.blurActiveElement();
+
+    nextTick(async () => {
+      try {
+        const pages = this.$refs.pages as HTMLElement[];
+
+        if (pages.length > 0) {
+          const page = pages[0];
+          //await this.saveGeneratedDataService.exportPageAsPng({
+          //  filePath: this.selectedWorkspace.filePath,
+          //  settings: settings,
+          //  page: page.cloneNode(true),
+          //} as ExportPageAsPngArgs);
+          const fontEmbedCSS = await getFontEmbedCSS(page);
+          //console.log(page);
+          //console.log(fontEmbedCSS);
+
+          const options = {
+            fontEmbedCSS,
+            pixelRatio: settings.dpi / 96,
+            style: { margin: '0' },
+          } as any;
+
+          if (settings.transparentBackground) {
+            options.style.backgroundColor = 'transparent';
+          }
+
+          toPng(page, options).then(
+            async (data) => {
+              //console.log(data);
+              if (data != null) {
+                data = data.replace(/^data:image\/png;base64,/, '');
+                await this.saveGeneratedDataService.exportPageAsPng(filePath, data);
+              }
+            },
+            (error) => {
+              console.error(error);
+            }
+          );
+
+          await this.finalizeGenerateRandomPage();
+        }
+      } catch (error) {
+        console.error(error);
+      } finally {
+        this.printMode = false;
+        this.exportInProgress = false;
+        this.closeExportDialog();
+        // Re-focus the active element
+        this.focusElement(activeElement);
+      }
+    });
   }
 
   async generateRandomPage() {
     // generating random neumes
     // first there is need to select the last element, but do not do that after inserting
-    this.nameWorkspaceWithTimestamp();
+    this.onFileMenuNewScore();
+    this.nameWorkspaceWithUUID();
     this.selectedElement = this.elements[this.elements.length - 1];
-    for (let i = 0; i < 30; ++i) {
+    await nextTick();
+    while (this.pages.length === 1) {
       const element = this.randomNeumeGenerator.next();
-      console.log(element);
+      //console.log(element);
       //element.lyricsColor = this.score.pageSetup.lyricsDefaultColor;
       //element.lyricsFontFamily = this.score.pageSetup.lyricsDefaultFontFamily;
       //element.lyricsFontSize = this.score.pageSetup.lyricsDefaultFontSize;
@@ -2756,19 +2846,42 @@ export default class Editor extends Vue {
       this.addScoreElement(element, this.elements.length - 1);
       //console.log(element);
       this.save();
-      //await ((ms) => new Promise(resolve => setTimeout(resolve, ms)))(100);
     }
 
-    //const settings = {
-    //  dpi: 300,
-    //  openFolder: false,
-    //  transparentBackground: false,
-    //} as ExportAsPngSettings;
-    //await this.exportAsNamedPng(settings);
-
-    //const workspace = this.selectedWorkspace;
-    //this.onFileMenuNewScore();
+    const workspace = this.selectedWorkspace;
+    await this.saveGeneratedWorkspace(workspace);
+    await this.exportPageAsPngCall();
+    //await ((ms) => new Promise(resolve => setTimeout(resolve, ms)))(1000);
     //await this.closeWorkspace(workspace);
+  }
+
+  async finalizeGenerateRandomPage() {
+    await ((ms) => new Promise(resolve => setTimeout(resolve, ms)))(100);
+    await this.closeWorkspace(this.selectedWorkspace);
+    await this.generationRecursiveCall();
+  }
+
+  async generationRecursiveCall() {
+    const release = await this.generationMutex.acquire();
+    if (this.generationPageNumber >= this.toGeneratePages) {
+      release();
+      this.generationPageNumber = -1;
+      this.toGeneratePages = -1;
+      return;
+    }
+    ++this.generationPageNumber;
+    release();
+    await this.generateRandomPage();
+  }
+
+  async generatePageImages(pages: number) {
+    await this.saveGeneratedDataService.setupDirectory();
+    await ((ms) => new Promise(resolve => setTimeout(resolve, ms)))(200);
+    const release = await this.generationMutex.acquire();
+    this.toGeneratePages = pages;
+    this.generationPageNumber = 0;
+    release();
+    await this.generationRecursiveCall();
   }
 
   getElementIndex(element: ScoreElement) {
@@ -7024,7 +7137,7 @@ export default class Editor extends Vue {
         'png',
       );
 
-      console.log(reply);
+      //console.log(reply);
 
       if (!reply.success) {
         return;
@@ -7062,9 +7175,10 @@ export default class Editor extends Vue {
             }
 
             let data = await toPng(page, options);
+            //console.log(data);
+            //console.log(fontEmbedCSS);
 
             if (data != null) {
-              console.log(Date.now());
               const fileName = reply.filePath.replace(
                 /\.png$/,
                 `-${pageNumber++}.png`,
@@ -7083,56 +7197,6 @@ export default class Editor extends Vue {
           await this.ipcService.showItemInFolder(
             reply.filePath.replace(/\.png$/, '-1.png'),
           );
-        }
-      } catch (error) {
-        console.error(error);
-      } finally {
-        this.printMode = false;
-        this.exportInProgress = false;
-        this.closeExportDialog();
-        // Re-focus the active element
-        this.focusElement(activeElement);
-      }
-    });
-  }
-
-  // automatically generate images
-  async exportAsNamedPng(args: ExportAsPngSettings) {
-    const filePath = this.selectedWorkspace.filePath;
-
-    this.printMode = true;
-    this.exportInProgress = true;
-
-    // Blur the active element so that focus outlines and
-    // blinking cursors don't show up in the printed page
-    const activeElement = this.blurActiveElement();
-
-    nextTick(async () => {
-      try {
-        const pages = this.$refs.pages as HTMLElement[];
-
-        if (pages.length > 0) {
-          const page = pages[0];
-          const fontEmbedCSS = await getFontEmbedCSS(page);
-
-          const options = {
-            fontEmbedCSS,
-            pixelRatio: args.dpi / 96,
-            style: { margin: '0' },
-          } as any;
-
-          if (args.transparentBackground) {
-            options.style.backgroundColor = 'transparent';
-          }
-
-          console.log(Date.now());
-          let data = await toPng(page, options);
-
-          if (data != null) {
-            console.log(Date.now());
-            data = data.replace(/^data:image\/png;base64,/, '');
-            await this.ipcService.exportPageAsImage(filePath, data);
-          }
         }
       } catch (error) {
         console.error(error);

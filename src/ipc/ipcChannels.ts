@@ -56,6 +56,7 @@ export enum IpcMainChannels {
 
 export enum IpcRendererChannels {
   GetBatchConfig = 'GetBatchConfig',
+  SetupBatchDirectory = 'SetupBatchDirectory',
 
   SetCanUndo = 'SetCanUndo',
   SetCanRedo = 'SetCanRedo',
@@ -150,6 +151,11 @@ export interface SaveWorkspaceAsReplyArgs {
 export interface BatchConfigReplyArgs {
   success: boolean;
   contents: BatchConfig | null;
+}
+
+export interface SetupBatchDirectoryReplyArgs {
+  success: boolean;
+  directory: string | null;
 }
 
 export interface SaveWorkspaceReplyArgs {

@@ -254,12 +254,15 @@
     <div class="page-number-container">
       {{ $t('toolbar:main.pageNumber', { currentPageNumber, pageCount }) }}
     </div>
+    <span class="divider"></span>
+    <GenerationInput min="1" @update:dataValue="generateCallWithValue" />
   </div>
 </template>
 
 <script lang="ts">
 import { Component, Prop, Vue } from 'vue-facing-decorator';
 
+import GenerationInput from '@/components/GenerationInput.vue';
 import InputUnit from '@/components/InputUnit.vue';
 import { LineBreakType } from '@/models/Element';
 import { EntryMode } from '@/models/EntryMode';
@@ -271,7 +274,7 @@ import { NeumeKeyboard } from '@/services/NeumeKeyboard';
 import Neume from './Neume.vue';
 
 @Component({
-  components: { InputUnit, Neume },
+  components: { GenerationInput, InputUnit, Neume },
   emits: [
     'add-auto-martyria',
     'add-drop-cap',
@@ -289,6 +292,7 @@ import Neume from './Neume.vue';
     'update:entryMode',
     'update:zoom',
     'update:zoomToFit',
+    'generate-page-images',
   ],
 })
 export default class ToolbarMain extends Vue {
@@ -394,6 +398,10 @@ export default class ToolbarMain extends Vue {
     this.showTempoMenu = false;
 
     window.removeEventListener('mouseup', this.onTempoMouseUp);
+  }
+
+  generateCallWithValue(value: number) {
+    this.$emit('generate-page-images', value);
   }
 }
 </script>

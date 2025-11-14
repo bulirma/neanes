@@ -22,6 +22,7 @@ import { MusicXmlExporter } from './services/integration/MusicXmlExporter';
 import { LyricService } from './services/LyricService';
 // random generater service
 import { RandomNeumeGenerator } from './services/RandomNeumeGenerator';
+import { SaveGeneratedDataService } from './services/SaveGeneratedDataService';
 import { TextSearchService } from './services/TextSearchService';
 import { isElectron } from './utils/isElectron';
 
@@ -86,6 +87,7 @@ app.provide('lyricService', new LyricService());
 app.provide('latexExporter', new LatexExporter());
 app.provide('musicXmlExporter', new MusicXmlExporter());
 app.provide('randomNeumeGenerator', new RandomNeumeGenerator());
+app.provide('saveGeneratedDataService', new SaveGeneratedDataService());
 app.use(router);
 app.use(I18NextVue, { i18next });
 

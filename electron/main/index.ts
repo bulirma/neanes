@@ -12,7 +12,7 @@ import {
   shell,
 } from 'electron';
 import { autoUpdater } from 'electron-updater';
-import { promises as fs } from 'fs';
+import { promises as fs, mkdir } from 'fs';
 import i18next from 'i18next';
 import Pseudo from 'i18next-pseudo';
 import { imageSizeFromFile } from 'image-size/fromFile';
@@ -1810,6 +1810,18 @@ ipcMain.handle(IpcRendererChannels.GetBatchConfig, async () => {
   } catch {
     console.error('Error loading a batch config file (check if file exists or whether it is valid); using default config');
     return {};
+  }
+});
+
+ipcMain.handle(IpcRendererChannels.SetupBatchDirectory, async () => {
+  try {
+    const dirName = Date.now().toString();
+    const path = `generated-data/${dirName}/dataset`;
+    await fs.mkdir(path, { recursive: true });
+    return { success: true, directory: path };
+  } catch (error) {
+    console.error(error);
+    return { success: false };
   }
 });
 

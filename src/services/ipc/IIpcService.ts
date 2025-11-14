@@ -5,6 +5,7 @@ import {
   OpenWorkspaceFromArgvArgs,
   SaveWorkspaceAsReplyArgs,
   SaveWorkspaceReplyArgs,
+  SetupBatchDirectoryReplyArgs,
   ShowMessageBoxArgs,
   ShowMessageBoxReplyArgs,
 } from '@/ipc/ipcChannels';
@@ -12,6 +13,8 @@ import { Workspace } from '@/models/Workspace';
 
 export interface IIpcService {
   getBatchConfig(): Promise<BatchConfigReplyArgs>;
+
+  setupBatchDirectory(): Promise<SetupBatchDirectoryReplyArgs>;
 
   saveWorkspace(workspace: Workspace): Promise<SaveWorkspaceReplyArgs>;
 
