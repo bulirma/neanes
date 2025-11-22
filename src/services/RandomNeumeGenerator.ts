@@ -1,5 +1,11 @@
 import { NoteElement, ScoreElement } from '@/models/Element';
 import {
+  Accidental,
+  GorgonNeume,
+  TimeNeume,
+  VocalExpressionNeume,
+} from '@/models/Neumes';
+import {
   PrimaryAccidentalNeumeGenerator,
   PrimaryAccidentalNeumePartialDistribution,
   SecondaryAccidentalNeumeGenerator,
@@ -7,7 +13,7 @@ import {
 } from '@/models/random-distribution/AccidentalNeumes';
 import {
   BatchConfig,
-  NeumeTypeDistribution,
+  NeumeTypeChances,
 } from '@/models/random-distribution/Config';
 import {
   PrimaryGorgonNeumeGenerator,
@@ -32,7 +38,7 @@ import { IpcService } from '@/services/ipc/IpcService';
 export class RandomNeumeGenerator {
   ipcService: IIpcService;
 
-  neumeTypeDistribution?: NeumeTypeDistribution;
+  neumeTypeChances?: NeumeTypeChances;
   quantitativeNuemeGenerator?: QuantitativeNeumeGenerator;
   vocalExpressionNeumeGenerator?: VocalExpresssionNeumeGenerator;
   primaryGorgonNeumeGenerator?: PrimaryGorgonNeumeGenerator;
@@ -50,8 +56,8 @@ export class RandomNeumeGenerator {
   }
 
   initialize(batchConfig: BatchConfig) {
-    this.neumeTypeDistribution = batchConfig.NeumeTypeDistribution ?? {
-      PrimaryGorgonNeume: 1,
+    this.neumeTypeChances = batchConfig.NeumeTypeChances ?? {
+      PrimaryGorgonNeume: 0,
       SecondaryGorgonNeume: 0,
       TimeNeume: 0,
       VocalExpressionNeume: 0,
@@ -59,9 +65,6 @@ export class RandomNeumeGenerator {
       SecondaryAccidentalNeume: 0,
       TertiaryAccidentalNeume: 0,
     };
-
-    if (this.neumeTypeDistribution.Total === undefined) {
-    }
 
     const quantitativeNeumeDist =
       batchConfig.QuantitativeNeumeDistribution ??
@@ -110,53 +113,74 @@ export class RandomNeumeGenerator {
   }
 
   next(): ScoreElement {
-    if (this.neumeTypeDistribution === undefined) {
+    if (this.neumeTypeChances === undefined) {
       throw new Error('Random neume generator was not initialized');
     }
     const score = new NoteElement();
     const quantitativeNeume = this.quantitativeNuemeGenerator!.next();
-    //const vocalExpressionNeume =
-    //  this.vocalExpressionNeumeGenerator!.isNextValid(quantitativeNeume)
-    //    ? this.vocalExpressionNeumeGenerator!.next()
-    //    : null;
-    //const primaryGorgonNeume = this.primaryGorgonNeumeGenerator!.isNextValid(
-    //  quantitativeNeume,
-    //  vocalExpressionNeume,
-    //)
-    //  ? this.primaryGorgonNeumeGenerator!.next(quantitativeNeume)
-    //  : null;
-    //const secondaryGorgonNeume =
-    //  this.secondaryGorgonNeumeGenerator!.isNextValid(
-    //    quantitativeNeume,
-    //    vocalExpressionNeume,
-    //  )
-    //    ? this.secondaryGorgonNeumeGenerator!.next()
-    //    : null;
-    //const timeNeume = this.timeNeumeGenerator!.isNextValid(quantitativeNeume)
-    //  ? this.timeNeumeGenerator!.next(quantitativeNeume)
-    //  : null;
-    //const primaryAccidentalNeume =
-    //  this.primaryAccidentalNeumeGenerator!.isNextValid(quantitativeNeume)
-    //    ? this.primaryAccidentalNeumeGenerator!.next()
-    //    : null;
-    //const secondaryAccidentalNeume =
-    //  this.secondaryAccidentalNeumeGenerator!.isNextValid(quantitativeNeume)
-    //    ? this.secondaryAccidentalNeumeGenerator!.next()
-    //    : null;
-    //const tertiaryAccidentalNeume =
-    //  this.tertiaryAccidentalNeumeGenerator!.isNextValid(quantitativeNeume)
-    //    ? this.tertiaryAccidentalNeumeGenerator!.next()
-    //    : null;
+    let vocalExpressionNeume: VocalExpressionNeume | null = null;
+    if (Math.random() < this.neumeTypeChances.VocalExpressionNeume) {
+      vocalExpressionNeume = this.vocalExpressionNeumeGenerator!.isNextValid(
+        quantitativeNeume,
+      )
+        ? this.vocalExpressionNeumeGenerator!.next()
+        : null;
+    }
+    let primaryGorgonNeume: GorgonNeume | null = null;
+    if (Math.random() < this.neumeTypeChances.PrimaryGorgonNeume) {
+      primaryGorgonNeume = this.primaryGorgonNeumeGenerator!.isNextValid(
+        quantitativeNeume,
+        vocalExpressionNeume,
+      )
+        ? this.primaryGorgonNeumeGenerator!.next(quantitativeNeume)
+        : null;
+    }
+    let secondaryGorgonNeume: GorgonNeume | null = null;
+    if (Math.random() < this.neumeTypeChances.SecondaryGorgonNeume) {
+      secondaryGorgonNeume = this.secondaryGorgonNeumeGenerator!.isNextValid(
+        quantitativeNeume,
+        vocalExpressionNeume,
+      )
+        ? this.secondaryGorgonNeumeGenerator!.next()
+        : null;
+    }
+    let timeNeume: TimeNeume | null = null;
+    if (Math.random() < this.neumeTypeChances.TimeNeume) {
+      timeNeume = this.timeNeumeGenerator!.isNextValid(quantitativeNeume)
+        ? this.timeNeumeGenerator!.next(quantitativeNeume)
+        : null;
+    }
+    let primaryAccidentalNeume: Accidental | null = null;
+    if (Math.random() < this.neumeTypeChances.PrimaryAccidentalNeume) {
+      primaryAccidentalNeume =
+        this.primaryAccidentalNeumeGenerator!.isNextValid(quantitativeNeume)
+          ? this.primaryAccidentalNeumeGenerator!.next()
+          : null;
+    }
+    let secondaryAccidentalNeume: Accidental | null = null;
+    if (Math.random() < this.neumeTypeChances.SecondaryAccidentalNeume) {
+      secondaryAccidentalNeume =
+        this.secondaryAccidentalNeumeGenerator!.isNextValid(quantitativeNeume)
+          ? this.secondaryAccidentalNeumeGenerator!.next()
+          : null;
+    }
+    let tertiaryAccidentalNeume: Accidental | null = null;
+    if (Math.random() < this.neumeTypeChances.TertiaryAccidentalNeume) {
+      tertiaryAccidentalNeume =
+        this.tertiaryAccidentalNeumeGenerator!.isNextValid(quantitativeNeume)
+          ? this.tertiaryAccidentalNeumeGenerator!.next()
+          : null;
+    }
 
     const attrs = {
       quantitativeNeume: quantitativeNeume,
-      //vocalExpressionNeume: vocalExpressionNeume,
-      //gorgonNeume: primaryGorgonNeume,
-      //secondaryGorgonNeume: secondaryGorgonNeume,
-      //timeNeume: timeNeume,
-      //accidental: primaryAccidentalNeume,
-      //secondaryAccidental: secondaryAccidentalNeume,
-      //tertiaryAccidental: tertiaryAccidentalNeume,
+      vocalExpressionNeume: vocalExpressionNeume,
+      gorgonNeume: primaryGorgonNeume,
+      secondaryGorgonNeume: secondaryGorgonNeume,
+      timeNeume: timeNeume,
+      accidental: primaryAccidentalNeume,
+      secondaryAccidental: secondaryAccidentalNeume,
+      tertiaryAccidental: tertiaryAccidentalNeume,
     };
     Object.assign(score, attrs);
 

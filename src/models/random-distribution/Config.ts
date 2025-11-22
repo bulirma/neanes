@@ -19,8 +19,7 @@ export interface Distribution {
   Denominator: number;
 }
 
-export interface NeumeTypeDistribution {
-  Total: number;
+export interface NeumeTypeChances {
   PrimaryGorgonNeume: number;
   SecondaryGorgonNeume: number;
   TimeNeume: number;
@@ -32,7 +31,7 @@ export interface NeumeTypeDistribution {
 }
 
 export interface BatchConfig {
-  NeumeTypeDistribution: NeumeTypeDistribution;
+  NeumeTypeChances: NeumeTypeChances;
   QuantitativeNeumeDistribution?: QuantitativeNeumePartialDistribution;
   VocalExpressionNeumeDistribution?: VocalExpressionNeumePartialDistribution;
   PrimaryGorgonNeumeDistribution?: PrimaryGorgonNeumePartialDistribution;

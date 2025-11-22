@@ -181,7 +181,7 @@ export class SecondaryGorgonNeumeGenerator extends NeumeGenerator<SecondaryGorgo
     ) {
       return false;
     }
-    if (getSecondaryNeume(quantitativeNeume)) {
+    if (getSecondaryNeume(quantitativeNeume) === null) {
       return false;
     }
     return true;
