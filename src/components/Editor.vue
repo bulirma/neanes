@@ -2832,6 +2832,13 @@ export default class Editor extends Vue {
     // first there is need to select the last element, but do not do that after inserting
     this.onFileMenuNewScore();
     this.nameWorkspaceWithUUID();
+
+    // delete first two elements
+    this.selectedElement = this.elements[0];
+    this.deleteSelectedElement();
+    this.selectedElement = this.elements[0];
+    this.deleteSelectedElement();
+
     this.selectedElement = this.elements[this.elements.length - 1];
     await nextTick();
     while (this.pages.length === 1) {
